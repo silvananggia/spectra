@@ -1,0 +1,15 @@
+// Color Variables
+$primary-dark-blue: #003366;
+$secondary-cyan: #0099FF;
+$text-dark-gray: #333333;
+$bg-light-gray: #F5F5F5;
+$white: #FFFFFF;
+
+// CSS Variables (for backward compatibility)
+:root {
+    --primary-dark-blue: #{$primary-dark-blue};
+    --secondary-cyan: #{$secondary-cyan};
+    --text-dark-gray: #{$text-dark-gray};
+    --bg-light-gray: #{$bg-light-gray};
+    --white: #{$white};
+}
