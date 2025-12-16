@@ -2,44 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import '../assets/style/ColorPalette.css';
 import './Products.scss';
-
-// Import JPG thumbnails from root data folder
-import longsorAcehThumb from '../assets/data/Longsor_Aceh_20251202_R2_AcehTengahAOI1.jpg';
-import banjirAcehUtaraThumb from '../assets/data/Banjir_Aceh_2511201_R2_AcehUtara.jpg';
-import banjirBireuenThumb from '../assets/data/Banjir_Aceh_251201_R2_Bireuen.jpg';
-import banjirLhokseumaweThumb from '../assets/data/Banjir_Aceh_251130_R2_Lhokseumawe.jpg';
-
-// Import PDF files from root data folder
-import longsorAcehPdf from '../assets/data/Longsor_Aceh_20251202_R2_AcehTengahAOI1.pdf';
-import banjirAcehUtaraPdf from '../assets/data/Banjir_Aceh_2511201_R2_AcehUtara.pdf';
-import banjirBireuenPdf from '../assets/data/Banjir_Aceh_251201_R2_Bireuen.pdf';
-import banjirLhokseumawePdf from '../assets/data/Banjir_Aceh_251130_R2_Lhokseumawe.pdf';
-
-// Import from Provinsi Aceh/Rilis-1_Aceh_Sentinel-1
-import banjirAcehSumutThumb from '../assets/data/Provinsi Aceh/Rilis-1_Aceh_Sentinel-1/Banjir_AcehSumut_251129_R1.jpg';
-import banjirAcehSumutPdf from '../assets/data/Provinsi Aceh/Rilis-1_Aceh_Sentinel-1/Banjir_AcehSumut_251129_R1.pdf';
-
-// Import from Provinsi Aceh/Rilis-2
-import longsorAcehR2Thumb from '../assets/data/Provinsi Aceh/Rilis-2/Longsor_Aceh_20251202_R2_AcehTengahAOI1.jpg';
-import longsorAcehR2Pdf from '../assets/data/Provinsi Aceh/Rilis-2/Longsor_Aceh_20251202_R2_AcehTengahAOI1.pdf';
-import banjirAcehUtaraR2Thumb from '../assets/data/Provinsi Aceh/Rilis-2/Banjir_Aceh_2511201_R2_AcehUtara.jpg';
-import banjirAcehUtaraR2Pdf from '../assets/data/Provinsi Aceh/Rilis-2/Banjir_Aceh_2511201_R2_AcehUtara.pdf';
-import banjirBireuenR2Thumb from '../assets/data/Provinsi Aceh/Rilis-2/Banjir_Aceh_251201_R2_Bireuen.jpg';
-import banjirBireuenR2Pdf from '../assets/data/Provinsi Aceh/Rilis-2/Banjir_Aceh_251201_R2_Bireuen.pdf';
-import banjirLhokseumaweR2Thumb from '../assets/data/Provinsi Aceh/Rilis-2/Banjir_Aceh_251130_R2_Lhokseumawe.jpg';
-import banjirLhokseumaweR2Pdf from '../assets/data/Provinsi Aceh/Rilis-2/Banjir_Aceh_251130_R2_Lhokseumawe.pdf';
-
-// Import from Provinsi Aceh/Rilis-1b_Aceh_Sentinel-1 (sample of QR products)
-import qrAcehA3Thumb from '../assets/data/Provinsi Aceh/Rilis-1b_Aceh_Sentinel-1/QR_Aceh_20251129_A3_R2.jpg';
-import qrAcehA3Pdf from '../assets/data/Provinsi Aceh/Rilis-1b_Aceh_Sentinel-1/QR_Aceh_20251129_A3_R2.pdf';
-import qrAcehA4Thumb from '../assets/data/Provinsi Aceh/Rilis-1b_Aceh_Sentinel-1/QR_Aceh_20251129_A4_R2.jpg';
-import qrAcehA4Pdf from '../assets/data/Provinsi Aceh/Rilis-1b_Aceh_Sentinel-1/QR_Aceh_20251129_A4_R2.pdf';
-import qrAcehB3Thumb from '../assets/data/Provinsi Aceh/Rilis-1b_Aceh_Sentinel-1/QR_Aceh_20251129_B3_R2.jpg';
-import qrAcehB3Pdf from '../assets/data/Provinsi Aceh/Rilis-1b_Aceh_Sentinel-1/QR_Aceh_20251129_B3_R2.pdf';
-import qrAcehB4Thumb from '../assets/data/Provinsi Aceh/Rilis-1b_Aceh_Sentinel-1/QR_Aceh_20251129_B4_R2.jpg';
-import qrAcehB4Pdf from '../assets/data/Provinsi Aceh/Rilis-1b_Aceh_Sentinel-1/QR_Aceh_20251129_B4_R2.pdf';
-import qrAcehB5Thumb from '../assets/data/Provinsi Aceh/Rilis-1b_Aceh_Sentinel-1/QR_Aceh_20251129_B5_R2.jpg';
-import qrAcehB5Pdf from '../assets/data/Provinsi Aceh/Rilis-1b_Aceh_Sentinel-1/QR_Aceh_20251129_B5_R2.pdf';
+import axiosInstance from '../api/axios';
 
 const Products = () => {
     const [previewImage, setPreviewImage] = useState(null);
@@ -48,165 +11,61 @@ const Products = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [regionFilter, setRegionFilter] = useState('Provinsi Aceh');
     const [eventTypeFilter, setEventTypeFilter] = useState('Semua kejadian');
+    const [allProducts, setAllProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const itemsPerPage = 9;
 
-    // Product data array
-    const allProducts = [
-        {
-            id: 1,
-            thumbnail: longsorAcehThumb,
-            pdf: longsorAcehPdf,
-            title: 'XX - Provinsi Aceh',
-            date: '02 Desember 2025',
-            releaseDate: new Date('2025-12-02'),
-            filename: 'Longsor_Aceh_20251202_R2_AcehTengahAOI1.pdf',
-            category: 'Longsor',
-            description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
-        },
-        {
-            id: 2,
-            thumbnail: banjirAcehUtaraThumb,
-            pdf: banjirAcehUtaraPdf,
-            title: 'XX - Lhokseumawe, Aceh Utara, Provinsi Aceh',
-            date: '25 November 2025',
-            releaseDate: new Date('2025-11-25'),
-            filename: 'Banjir_Aceh_2511201_R2_AcehUtara.pdf',
-            category: 'Banjir',
-            description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
-        },
-        {
-            id: 3,
-            thumbnail: banjirBireuenThumb,
-            pdf: banjirBireuenPdf,
-            title: 'C8 - Peunaron, Aceh Timur, Provinsi Aceh',
-            date: '01 Desember 2025',
-            releaseDate: new Date('2025-12-01'),
-            filename: 'Banjir_Aceh_251201_R2_Bireuen.pdf',
-            category: 'Banjir',
-            description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
-        },
-        {
-            id: 4,
-            thumbnail: banjirLhokseumaweThumb,
-            pdf: banjirLhokseumawePdf,
-            title: 'D9 - Kejuruan Muda, Aceh Tamiang, Provinsi Aceh',
-            date: '30 November 2025',
-            releaseDate: new Date('2025-11-30'),
-            filename: 'Banjir_Aceh_251130_R2_Lhokseumawe.pdf',
-            category: 'Banjir',
-            description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
-        },
-        {
-            id: 5,
-            thumbnail: banjirAcehSumutThumb,
-            pdf: banjirAcehSumutPdf,
-            title: 'XX - Provinsi Aceh',
-            date: '29 November 2025',
-            releaseDate: new Date('2025-11-29'),
-            filename: 'Banjir_AcehSumut_251129_R1.pdf',
-            category: 'Banjir',
-            description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
-        },
-        {
-            id: 6,
-            thumbnail: longsorAcehR2Thumb,
-            pdf: longsorAcehR2Pdf,
-            title: 'XX - Provinsi Aceh',
-            date: '02 Desember 2025',
-            releaseDate: new Date('2025-12-02'),
-            filename: 'Longsor_Aceh_20251202_R2_AcehTengahAOI1.pdf',
-            category: 'Longsor',
-            description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
-        },
-        {
-            id: 7,
-            thumbnail: banjirAcehUtaraR2Thumb,
-            pdf: banjirAcehUtaraR2Pdf,
-            title: 'XX - Provinsi Aceh',
-            date: '25 November 2025',
-            releaseDate: new Date('2025-11-25'),
-            filename: 'Banjir_Aceh_2511201_R2_AcehUtara.pdf',
-            category: 'Banjir',
-            description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
-        },
-        {
-            id: 8,
-            thumbnail: banjirBireuenR2Thumb,
-            pdf: banjirBireuenR2Pdf,
-            title: 'XX - Provinsi Aceh',
-            date: '01 Desember 2025',
-            releaseDate: new Date('2025-12-01'),
-            filename: 'Banjir_Aceh_251201_R2_Bireuen.pdf',
-            category: 'Banjir',
-            description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
-        },
-        {
-            id: 9,
-            thumbnail: banjirLhokseumaweR2Thumb,
-            pdf: banjirLhokseumaweR2Pdf,
-            title: 'XX - Provinsi Aceh',
-            date: '30 November 2025',
-            releaseDate: new Date('2025-11-30'),
-            filename: 'Banjir_Aceh_251130_R2_Lhokseumawe.pdf',
-            category: 'Banjir',
-            description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
-        },
-        {
-            id: 10,
-            thumbnail: qrAcehA3Thumb,
-            pdf: qrAcehA3Pdf,
-            title: 'XX - Provinsi Aceh',
-            date: '29 November 2025',
-            releaseDate: new Date('2025-11-29'),
-            filename: 'QR_Aceh_20251129_A3_R2.pdf',
-            category: 'Quick Response',
-            description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
-        },
-        {
-            id: 11,
-            thumbnail: qrAcehA4Thumb,
-            pdf: qrAcehA4Pdf,
-            title: 'XX - Provinsi Aceh',
-            date: '29 November 2025',
-            releaseDate: new Date('2025-11-29'),
-            filename: 'QR_Aceh_20251129_A4_R2.pdf',
-            category: 'Quick Response',
-            description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
-        },
-        {
-            id: 12,
-            thumbnail: qrAcehB3Thumb,
-            pdf: qrAcehB3Pdf,
-            title: 'XX - Provinsi Aceh',
-            date: '29 November 2025',
-            releaseDate: new Date('2025-11-29'),
-            filename: 'QR_Aceh_20251129_B3_R2.pdf',
-            category: 'Quick Response',
-            description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
-        },
-        {
-            id: 13,
-            thumbnail: qrAcehB4Thumb,
-            pdf: qrAcehB4Pdf,
-            title: 'XX - Provinsi Aceh',
-            date: '29 November 2025',
-            releaseDate: new Date('2025-11-29'),
-            filename: 'QR_Aceh_20251129_B4_R2.pdf',
-            category: 'Quick Response',
-            description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
-        },
-        {
-            id: 14,
-            thumbnail: qrAcehB5Thumb,
-            pdf: qrAcehB5Pdf,
-            title: 'XX - Provinsi Aceh',
-            date: '29 November 2025',
-            releaseDate: new Date('2025-11-29'),
-            filename: 'QR_Aceh_20251129_B5_R2.pdf',
-            category: 'Quick Response',
-            description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
-        }
-    ];
+    // Fetch products from API
+    useEffect(() => {
+        const fetchProducts = async () => {
+            try {
+                setLoading(true);
+                setError(null);
+                // Fetch all products with a high limit to get all products
+                const response = await axiosInstance.get('/products', {
+                    params: {
+                        page: 1,
+                        limit: 100 // Get all products
+                    }
+                });
+                
+                if (response.data.status === 'success' && response.data.data) {
+                    // Transform API data to match component format
+                    const products = response.data.data.map(product => {
+                        // Construct thumbnail URL from backend
+                        // Use preview endpoint which serves thumbnail if available, otherwise main file
+                        const thumbnailUrl = product.thumbnail 
+                            ? `${process.env.REACT_APP_API_URL || ''}/products/${product.id}/preview`
+                            : null;
+                        
+                        // Parse date string to Date object for sorting
+                        const releaseDate = product.date ? new Date(product.date) : new Date();
+                        
+                        return {
+                            id: product.id,
+                            thumbnail: thumbnailUrl,
+                            title: product.title || 'Untitled',
+                            date: product.date || '',
+                            releaseDate: releaseDate,
+                            filename: product.filename || '',
+                            category: product.category || 'Unknown'
+                        };
+                    });
+                    setAllProducts(products);
+                } else {
+                    setError('Failed to fetch products');
+                }
+            } catch (err) {
+                console.error('Error fetching products:', err);
+                setError('Failed to fetch products. Please try again later.');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchProducts();
+    }, []);
 
     // Filter and sort products
     const filteredProducts = allProducts.filter(product => {
@@ -229,6 +88,17 @@ const Products = () => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     const currentProducts = sortedProducts.slice(startIndex, endIndex);
+
+    // Handle download
+    const handleDownload = (productId, filename) => {
+        const downloadUrl = `${process.env.REACT_APP_API_URL || ''}/products/${productId}/download`;
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
 
     const handleImagePreview = (imageUrl, title) => {
         setPreviewImage(imageUrl);
@@ -259,15 +129,6 @@ const Products = () => {
             document.body.style.overflow = 'unset';
         };
     }, [previewImage]);
-
-    const handleDownload = (pdfUrl, filename) => {
-        const link = document.createElement('a');
-        link.href = pdfUrl;
-        link.download = filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    };
 
     const handleSearch = () => {
         // Reset to first page when searching
@@ -319,7 +180,8 @@ const Products = () => {
                             <option>Semua kejadian</option>
                             <option>Banjir</option>
                             <option>Longsor</option>
-                            <option>Quick Response</option>
+                            <option>QR</option>
+                             <option>PCS</option>
                         </select>
                     </div>
                     <button className="btn-search" onClick={handleSearch}>
@@ -353,26 +215,65 @@ const Products = () => {
 
             {/* Products Grid */}
             <section className="products-grid-section">
-                <div className="products-grid">
-                    {currentProducts.map((product) => (
-                        <div key={product.id} className="product-card">
-                            <div 
-                                className="card-image"
-                                onClick={() => handleImagePreview(product.thumbnail, product.title)}
-                            >
-                                <img 
-                                    src={product.thumbnail} 
-                                    alt={product.title}
-                                />
+                {loading ? (
+                    <div style={{ textAlign: 'center', padding: '2rem' }}>
+                        <p>Memuat produk...</p>
+                    </div>
+                ) : error ? (
+                    <div style={{ textAlign: 'center', padding: '2rem', color: 'red' }}>
+                        <p>{error}</p>
+                    </div>
+                ) : (
+                    <div className="products-grid">
+                        {currentProducts.length > 0 ? (
+                            currentProducts.map((product) => (
+                                <div key={product.id} className="release-card">
+                                    <div 
+                                        className="card-image"
+                                        onClick={() => product.thumbnail && handleImagePreview(product.thumbnail, product.title)}
+                                    >
+                                        {product.thumbnail ? (
+                                            <img 
+                                                src={product.thumbnail} 
+                                                alt={product.title}
+                                                onError={(e) => {
+                                                    e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Crect fill="%23ddd" width="200" height="200"/%3E%3Ctext fill="%23999" font-family="sans-serif" font-size="14" x="50%25" y="50%25" text-anchor="middle" dy=".3em"%3ENo Image%3C/text%3E%3C/svg%3E';
+                                                }}
+                                            />
+                                        ) : (
+                                            <div style={{ 
+                                                width: '100%', 
+                                                height: '200px', 
+                                                backgroundColor: '#ddd', 
+                                                display: 'flex', 
+                                                alignItems: 'center', 
+                                                justifyContent: 'center' 
+                                            }}>
+                                                No Image
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="card-content">
+                                        <h3 className="card-title">{product.title}</h3>
+                                        <button 
+                                            className="btn-access"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleDownload(product.id, product.filename);
+                                            }}
+                                        >
+                                            Akses Data
+                                        </button>
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <div style={{ textAlign: 'center', padding: '2rem' }}>
+                                <p>Tidak ada produk ditemukan</p>
                             </div>
-                            <div className="card-content">
-                                <p className="card-date">Rilis: {product.date}</p>
-                                <h3 className="card-title">{product.title}</h3>
-                                <p className="card-description">{product.description}</p>
-                            </div>
-                        </div>
-                    ))}
-                </div>
+                        )}
+                    </div>
+                )}
             </section>
 
             {/* Pagination */}

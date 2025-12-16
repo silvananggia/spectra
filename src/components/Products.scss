@@ -171,10 +171,12 @@
 
 .products-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
     gap: 2rem;
+    overflow-x: auto;
+    padding-bottom: 1rem;
 
-    .product-card {
+    .release-card {
         background: $white;
         border-radius: 12px;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -190,10 +192,9 @@
 
         .card-image {
             width: 100%;
-            height: 250px;
+            height: 200px;
             overflow: hidden;
             cursor: pointer;
-            background: #e5e7eb;
 
             img {
                 width: 100%;
@@ -214,26 +215,36 @@
             flex-direction: column;
         }
 
-        .card-date {
-            font-size: 0.9rem;
-            color: #6b7280;
-            margin: 0 0 0.75rem 0;
-        }
-
         .card-title {
-            font-size: 1.1rem;
+            font-size: 1.25rem;
             font-weight: 700;
             color: $text-dark-gray;
-            margin: 0 0 0.75rem 0;
-            line-height: 1.4;
+            margin: 0 0 1rem 0;
         }
 
-        .card-description {
-            font-size: 0.95rem;
+        .card-text {
+            font-size: 1rem;
             color: #4b5563;
             line-height: 1.6;
-            margin: 0;
+            margin: 0 0 1.5rem 0;
             flex: 1;
+        }
+
+        .btn-access {
+            background-color: $primary-red;
+            color: $white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            align-self: flex-start;
+
+            &:hover {
+                background-color: darken($primary-red, 10%);
+            }
         }
     }
 }
@@ -376,10 +387,6 @@
 
 // Responsive Design
 @media (max-width: 1024px) {
-    .products-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
     .search-container {
         grid-template-columns: 1fr;
     }
@@ -414,7 +421,6 @@
 
     .products-grid {
         grid-template-columns: 1fr;
-        gap: 1.5rem;
     }
 
     .filter-tabs {
