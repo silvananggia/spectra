@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import '../assets/style/ColorPalette.css';
+import './Home.scss';
 
 // Import JPG thumbnails
 import longsorAcehThumb from '../assets/data/Longsor_Aceh_20251202_R2_AcehTengahAOI1.jpg';
@@ -14,20 +15,25 @@ import banjirAcehUtaraPdf from '../assets/data/Banjir_Aceh_2511201_R2_AcehUtara.
 import banjirBireuenPdf from '../assets/data/Banjir_Aceh_251201_R2_Bireuen.pdf';
 import banjirLhokseumawePdf from '../assets/data/Banjir_Aceh_251130_R2_Lhokseumawe.pdf';
 
-// Import partner logos
-import logoKemhan from '../assets/images/logo/logo_kemhan.png';
-import logoLen from '../assets/images/logo/logo_len.png';
-import logoBnpb from '../assets/images/logo/logo_bnpb.png';
-import logoBlacksky from '../assets/images/logo/logo_blacksky.png';
-import logoUnspider from '../assets/images/logo/unspider_logo.png';
-
-// Import header image
-import headerImage from '../assets/images/header.png';
+// Import partner logos (mitra folder)
+import logoBlackSky from '../assets/images/logo/mitra/blacksky_logo_2021_blackyellow_web.jpg';
+import logoInternationalCharter from '../assets/images/logo/mitra/InternationalCharterLogo4_0.jpg';
+import logoKemhan from '../assets/images/logo/mitra/Kemhan.tiw3951-1024x1024.png';
+import logoBnpb from '../assets/images/logo/mitra/Logo_BNPB.png';
+import logoLen from '../assets/images/logo/mitra/Logo_Len_Industri_Baru.png';
+import logoUndip from '../assets/images/logo/mitra/Logo_Universitas_Diponegoro.png';
+import logoUnitSE from '../assets/images/logo/mitra/UnitSE_Posi_White.jpg';
+import logoUgm from '../assets/images/logo/mitra/UNIVERSITAS_GADJAH_MADA,_YOGYAKARTA.png';
+import logoUnspider from '../assets/images/logo/mitra/unspider_logo_resc.png';
 
 const Home = () => {
     // State for image preview modal
     const [previewImage, setPreviewImage] = useState(null);
     const [previewTitle, setPreviewTitle] = useState('');
+
+    // State for latest releases pagination
+    const [releasePage, setReleasePage] = useState(0);
+    const RELEASES_PER_PAGE = 3;
 
     // Function to handle image preview
     const handleImagePreview = (imageUrl, title) => {
@@ -50,11 +56,9 @@ const Home = () => {
         };
         
         if (previewImage) {
-            // Prevent body scroll when modal is open
             document.body.style.overflow = 'hidden';
             window.addEventListener('keydown', handleEscape);
         } else {
-            // Restore body scroll when modal is closed
             document.body.style.overflow = 'unset';
         }
         
@@ -99,351 +103,183 @@ const Home = () => {
             title: 'Banjir Aceh - Bireuen',
             date: '01 Des 2025',
             filename: 'Banjir_Aceh_251201_R2_Bireuen.pdf'
-        },
-        {
-            id: 4,
-            thumbnail: banjirLhokseumaweThumb,
-            pdf: banjirLhokseumawePdf,
-            title: 'Banjir Aceh - Lhokseumawe',
-            date: '30 Nov 2025',
-            filename: 'Banjir_Aceh_251130_R2_Lhokseumawe.pdf'
         }
     ];
 
-    return (
-        <main>
-            {/* 1. Hero Section */}
-            <section className="hero" style={{
-                height: '400px',
-                backgroundImage: `url(${headerImage})`,
-                backgroundSize: 'cover',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                alignItems: 'center',
-                textAlign: 'center',
-                color: 'var(--white)',
-                padding: '0 20px'
-            }}>
-                <h1 style={{ fontSize: '2.5em', marginBottom: '10px' }}>
-               Satellite Platform for Emergency Crisis, Tracking and Remote Analytic
-                </h1>
-                <p style={{ fontSize: '1.2em', marginBottom: '30px' }}>
-                    Dukungan data geospasial cepat dan akurat untuk manajemen bencana nasional.
-                </p>
-                <Link to="/maps" className="btn-primary">Akses Peta Interaktif</Link>
-            </section>
+    // Partner logos data (mitra logos)
+    const partners = [
+        { id: 1, logo: logoKemhan, alt: 'Logo Kementerian Pertahanan' },
+        { id: 2, logo: logoLen, alt: 'Logo LEN Industri' },
+        { id: 3, logo: logoBnpb, alt: 'Logo BNPB' },
+        { id: 4, logo: logoBlackSky, alt: 'Logo BlackSky' },
+        { id: 5, logo: logoUnspider, alt: 'Logo UN-SPIDER' },
+        { id: 6, logo: logoInternationalCharter, alt: 'Logo International Charter' },
+        { id: 7, logo: logoUndip, alt: 'Logo Universitas Diponegoro' },
+        { id: 8, logo: logoUgm, alt: 'Logo Universitas Gadjah Mada' },
+        { id: 9, logo: logoUnitSE, alt: 'Logo Unit SE Posi' }
+    ];
 
-            {/* 2. Highlight Produk Terbaru */}
-            <section className="product-highlight" style={{ padding: '50px', textAlign: 'center', backgroundColor: 'var(--bg-light-gray)' }}>
-                <h2 style={{ marginBottom: '30px', color: 'var(--primary-dark-blue)' }}>Produk Peta Terbaru</h2>
-                <div style={{ 
-                    display: 'grid', 
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-                    gap: '30px',
-                    maxWidth: '1200px',
-                    margin: '0 auto'
-                }}>
-                    {products.map((product) => (
-                        <div 
-                            key={product.id}
-                            className="product-card" 
-                            style={{ 
-                                padding: '20px', 
-                                backgroundColor: 'var(--white)', 
-                                borderRadius: '8px', 
-                                boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-                                cursor: 'pointer',
-                                transition: 'transform 0.2s, box-shadow 0.2s'
-                            }}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.transform = 'translateY(-5px)';
-                                e.currentTarget.style.boxShadow = '0 6px 12px rgba(0,0,0,0.15)';
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.transform = 'translateY(0)';
-                                e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
-                            }}
-                        >
-                            <img 
-                                src={product.thumbnail} 
-                                alt={product.title} 
-                                style={{ 
-                                    width: '100%', 
-                                    height: '200px',
-                                    objectFit: 'cover',
-                                    borderRadius: '5px', 
-                                    marginBottom: '10px',
-                                    cursor: 'pointer'
-                                }}
-                                onClick={() => handleImagePreview(product.thumbnail, product.title)}
-                            />
-                            <h3 style={{ color: 'var(--secondary-cyan)', marginBottom: '8px' }}>
-                                {product.title}
-                            </h3>
-                            <p style={{ marginBottom: '10px', fontSize: '0.9em', color: '#666' }}>
-                                Diperbarui: {product.date}
-                            </p>
-                            <button 
-                                style={{
-                                    backgroundColor: 'var(--primary-dark-blue)',
-                                    color: 'var(--white)',
-                                    border: 'none',
-                                    padding: '8px 16px',
-                                    borderRadius: '4px',
-                                    cursor: 'pointer',
-                                    fontSize: '0.9em',
-                                    fontWeight: 'bold'
-                                }}
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleDownload(product.pdf, product.filename);
-                                }}
-                            >
-                                Download PDF
-                            </button>
+    return (
+        <main className="home-page">
+            {/* Hero Section */}
+            <section className="hero">
+                <div className="hero-overlay"></div>
+                <div className="hero-content">
+                    <div className="hero-text">
+                        <h1 className="hero-heading">Near-Realtime. Open. Unlimited Insights</h1>
+                        <p className="hero-description">
+                            SPECTRA adalah Platform Satelit untuk Emergency Crisis Tracking dan Remote Analytics. 
+                            Akses citra satelit berkualitas tinggi, terbarui secara berkala, dan near-realtime untuk 
+                            monitoring bencana, penelitian, rapid response, dan pengambilan keputusan berbasis data.
+                        </p>
+                    </div>
+                    <div className="search-form-container">
+                        <div className="search-form">
+                            <h2 className="search-form-title">Mulai jelajahi data citra</h2>
+                            <div className="form-fields">
+                                <div className="form-field">
+                                    <label htmlFor="region">Nama Daerah</label>
+                                    <input 
+                                        type="text" 
+                                        id="region" 
+                                        placeholder="Masukkan nama daerah"
+                                        className="form-input"
+                                    />
+                                </div>
+                                <div className="form-field">
+                                    <label htmlFor="incident">Jenis Kejadian</label>
+                                    <select id="incident" className="form-select">
+                                        <option>Semua kejadian</option>
+                                    </select>
+                                </div>
+                                <button className="btn-search">Cari Data</button>
+                            </div>
                         </div>
-                    ))}
+                    </div>
                 </div>
             </section>
 
-            {/* 3. Kolaborasi */}
-            <section className="collaboration" style={{ padding: '30px 50px', textAlign: 'center', backgroundColor: 'var(--white)' }}>
-                <h2 style={{ color: 'var(--primary-dark-blue)', marginBottom: '40px' }}>Mitra Kolaborasi</h2>
-                <div style={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    flexWrap: 'wrap',
-                    gap: '50px',
-                    maxWidth: '1200px',
-                    margin: '0 auto'
-                }}>
-                    <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        height: '120px',
-                        padding: '20px'
-                    }}>
-                        <img 
-                            src={logoKemhan} 
-                            alt="Logo Kementerian Pertahanan" 
-                            style={{
-                                maxHeight: '100%',
-                                maxWidth: '200px',
-                                objectFit: 'contain',
-                                filter: 'grayscale(0%)',
-                                transition: 'transform 0.3s ease'
-                            }}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.transform = 'scale(1.05)';
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.transform = 'scale(1)';
-                            }}
-                        />
+            {/* Latest Releases Section */}
+            <section className="latest-releases">
+                <div className="container">
+                    <div className="latest-header">
+                        <h2 className="section-heading">Rilisan Terbaru</h2>
+                        <div className="releases-nav">
+                            <button
+                                type="button"
+                                className="releases-nav-btn"
+                                onClick={() => setReleasePage((prev) => Math.max(0, prev - 1))}
+                                disabled={releasePage === 0}
+                            >
+                                ← Sebelumnya
+                            </button>
+                            <button
+                                type="button"
+                                className="releases-nav-btn"
+                                onClick={() =>
+                                    setReleasePage((prev) =>
+                                        (prev + 1) * RELEASES_PER_PAGE >= products.length ? prev : prev + 1
+                                    )
+                                }
+                                disabled={(releasePage + 1) * RELEASES_PER_PAGE >= products.length}
+                            >
+                                Selanjutnya →
+                            </button>
+                        </div>
                     </div>
-                    <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        height: '120px',
-                        padding: '20px'
-                    }}>
-                        <img 
-                            src={logoLen} 
-                            alt="Logo LEN" 
-                            style={{
-                                maxHeight: '100%',
-                                maxWidth: '200px',
-                                objectFit: 'contain',
-                                filter: 'grayscale(0%)',
-                                transition: 'transform 0.3s ease'
-                            }}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.transform = 'scale(1.05)';
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.transform = 'scale(1)';
-                            }}
-                        />
+                    <div className="releases-grid">
+                        {products
+                            .slice(
+                                releasePage * RELEASES_PER_PAGE,
+                                releasePage * RELEASES_PER_PAGE + RELEASES_PER_PAGE
+                            )
+                            .map((product) => (
+                            <div key={product.id} className="release-card">
+                                <div 
+                                    className="card-image"
+                                    onClick={() => handleImagePreview(product.thumbnail, product.title)}
+                                >
+                                    <img 
+                                        src={product.thumbnail} 
+                                        alt={product.title}
+                                    />
+                                </div>
+                                <div className="card-content">
+                                    <h3 className="card-title">{product.title}</h3>
+                                    <p className="card-text">
+                                        Body text for whatever you'd like to say. Add main takeaway points, 
+                                        quotes, anecdotes, or even a very very short story.
+                                    </p>
+                                    <button 
+                                        className="btn-access"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleDownload(product.pdf, product.filename);
+                                        }}
+                                    >
+                                        Akses Data
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
                     </div>
-                    <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        height: '120px',
-                        padding: '20px'
-                    }}>
-                        <img 
-                            src={logoBnpb} 
-                            alt="Logo BNPB" 
-                            style={{
-                                maxHeight: '100%',
-                                maxWidth: '200px',
-                                objectFit: 'contain',
-                                filter: 'grayscale(0%)',
-                                transition: 'transform 0.3s ease'
-                            }}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.transform = 'scale(1.05)';
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.transform = 'scale(1)';
-                            }}
-                        />
+                </div>
+            </section>
+
+            {/* Interactive Map Section */}
+            <section className="interactive-map">
+                <div className="map-overlay"></div>
+                <div className="container map-container">
+                    <div className="map-content">
+                        <h2 className="map-heading">SPECTRA Interactive Map</h2>
+                        <p className="map-description">
+                            Lihat, zoom, analisis. Akses detail data dan informasi yang Anda butuhkan secara instan.
+                        </p>
                     </div>
-                    <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        height: '120px',
-                        padding: '20px'
-                    }}>
-                        <img 
-                            src={logoBlacksky} 
-                            alt="Logo BlackSky" 
-                            style={{
-                                maxHeight: '100%',
-                                maxWidth: '200px',
-                                objectFit: 'contain',
-                                filter: 'grayscale(0%)',
-                                transition: 'transform 0.3s ease'
-                            }}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.transform = 'scale(1.05)';
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.transform = 'scale(1)';
-                            }}
-                        />
-                    </div>
-                    <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        height: '120px',
-                        padding: '20px'
-                    }}>
-                        <img 
-                            src={logoUnspider} 
-                            alt="Logo UN-SPIDER" 
-                            style={{
-                                maxHeight: '100%',
-                                maxWidth: '200px',
-                                objectFit: 'contain',
-                                filter: 'grayscale(0%)',
-                                transition: 'transform 0.3s ease'
-                            }}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.transform = 'scale(1.05)';
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.transform = 'scale(1)';
-                            }}
-                        />
+                    <Link to="/maps" className="btn-map-cta">Akses Sekarang →</Link>
+                </div>
+            </section>
+
+            {/* Collaboration Partners Section */}
+            <section className="partners">
+                <div className="container">
+                    <h2 className="section-heading partners-heading">Mitra Kolaborasi</h2>
+                    <div className="partners-grid">
+                        {partners.map((partner) => (
+                            <div key={partner.id} className="partner-logo">
+                                <img 
+                                    src={partner.logo} 
+                                    alt={partner.alt}
+                                />
+                            </div>
+                        ))}
                     </div>
                 </div>
             </section>
 
             {/* Image Preview Modal */}
             {previewImage && (
-                <div
-                    style={{
-                        position: 'fixed',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        backgroundColor: 'rgba(0, 0, 0, 0.9)',
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        zIndex: 1000,
-                        padding: '20px',
-                        cursor: 'pointer'
-                    }}
-                    onClick={closePreview}
-                >
-                    <div
-                        style={{
-                            position: 'relative',
-                            maxWidth: '90%',
-                            maxHeight: '90%',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center'
-                        }}
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        {/* Close Button */}
+                <div className="preview-modal" onClick={closePreview}>
+                    <div className="preview-content" onClick={(e) => e.stopPropagation()}>
                         <button
                             onClick={closePreview}
-                            style={{
-                                position: 'absolute',
-                                top: '-40px',
-                                right: '0',
-                                backgroundColor: 'transparent',
-                                border: 'none',
-                                color: 'var(--white)',
-                                fontSize: '2em',
-                                cursor: 'pointer',
-                                padding: '5px 15px',
-                                borderRadius: '4px',
-                                transition: 'background-color 0.2s'
-                            }}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.backgroundColor = 'transparent';
-                            }}
+                            className="preview-close"
                             aria-label="Close preview"
                         >
                             ×
                         </button>
-                        
-                        {/* Image Title */}
-                        <h3
-                            style={{
-                                color: 'var(--white)',
-                                marginBottom: '20px',
-                                textAlign: 'center',
-                                fontSize: '1.5em'
-                            }}
-                        >
-                            {previewTitle}
-                        </h3>
-                        
-                        {/* Preview Image */}
+                        <h3 className="preview-title">{previewTitle}</h3>
                         <img
                             src={previewImage}
                             alt={previewTitle}
-                            style={{
-                                maxWidth: '100%',
-                                maxHeight: '80vh',
-                                objectFit: 'contain',
-                                borderRadius: '8px',
-                                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5)'
-                            }}
+                            className="preview-image"
                         />
-                        
-                        {/* Instructions */}
-                        <p
-                            style={{
-                                color: 'var(--white)',
-                                marginTop: '20px',
-                                fontSize: '0.9em',
-                                opacity: 0.8
-                            }}
-                        >
+                        <p className="preview-instruction">
                             Tekan ESC atau klik di luar gambar untuk menutup
                         </p>
                     </div>
                 </div>
             )}
-
         </main>
     );
 };

@@ -1,32 +1,17 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import '../assets/style/ColorPalette.css';
+import logoBrin from '../assets/images/logo/Logo BRIN_Lanscape_White.png';
+import './Footer.scss';
 
 const Footer = () => (
-  <footer style={{
-    backgroundColor: 'var(--primary-dark-blue)',
-    color: 'var(--white)',
-    padding: '20px 50px',
-    textAlign: 'center',
-    marginTop: '30px'
-  }}>
-    <p style={{ marginBottom: '10px' }}>
-      Copyright © 2025 BRIN | SPECTRA (Satellite Platform for Emergency Crisis, Tracking and Remote Analytic)
-    </p>
-    <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', flexWrap: 'wrap' }}>
-      <Link 
-        to="/privacy-policy" 
-        style={{ color: 'var(--secondary-cyan)', textDecoration: 'none' }}
-      >
-        Kebijakan Privasi
-      </Link>
-      <span style={{ color: 'var(--white)' }}>|</span>
-      <Link 
-        to="/disclaimer" 
-        style={{ color: 'var(--secondary-cyan)', textDecoration: 'none' }}
-      >
-        Disclaimer & Ketentuan
-      </Link>
+  <footer className="spectra-footer">
+    <div className="footer-content">
+      <div className="footer-logo">
+        <img src={logoBrin} alt="BRIN Logo" className="footer-logo-img" />
+      </div>
+      <p className="footer-copyright">
+        SPECTRA ©2025 by Pusat Riset Geoinformatika BRIN
+      </p>
     </div>
   </footer>
 );

@@ -1,0 +1,160 @@
+@import '../assets/scss/variables';
+
+.privacy-page {
+  padding-top: 80px;
+  min-height: 100vh;
+  background: $white;
+}
+
+.privacy-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) 320px;
+  gap: 2rem;
+}
+
+.privacy-main {
+  background: $white;
+}
+
+.privacy-header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.privacy-hero-icon {
+  width: 96px;
+  height: 96px;
+  border-radius: 9999px;
+  border: 2px solid rgba(220, 38, 38, 0.3);
+}
+
+.privacy-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: $text-dark-gray;
+  margin: 0 0 0.5rem 0;
+}
+
+.privacy-updated {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+.privacy-content {
+  background: $white;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  padding: 2rem 2.5rem;
+}
+
+.privacy-section {
+  margin-bottom: 2rem;
+
+  &:last-of-type {
+    margin-bottom: 0;
+  }
+
+  p {
+    margin: 0 0 0.75rem 0;
+    color: $text-dark-gray;
+    line-height: 1.7;
+    font-size: 0.95rem;
+  }
+
+  ul {
+    margin: 0.5rem 0 0 1.25rem;
+    padding: 0;
+    list-style: disc;
+  }
+
+  li {
+    margin-bottom: 0.4rem;
+    color: $text-dark-gray;
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+}
+
+.section-heading {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: $text-dark-gray;
+  margin: 0 0 0.75rem 0;
+}
+
+// Sidebar
+.privacy-sidebar {
+  align-self: flex-start;
+}
+
+.sidebar-card {
+  background: $white;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  padding: 1rem 0;
+  position: sticky;
+  top: 96px;
+}
+
+.sidebar-item {
+  width: 100%;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+  text-align: left;
+  cursor: pointer;
+  color: $text-dark-gray;
+  transition: background-color 0.2s, color 0.2s;
+
+  &:hover {
+    background: #f3f4f6;
+  }
+}
+
+.sidebar-number {
+  font-weight: 600;
+}
+
+.sidebar-title {
+  flex: 1;
+}
+
+// Responsive
+@media (max-width: 1024px) {
+  .privacy-container {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .privacy-sidebar {
+    order: -1;
+  }
+}
+
+@media (max-width: 768px) {
+  .privacy-page {
+    padding-top: 100px;
+  }
+
+  .privacy-container {
+    padding: 1.5rem 1rem;
+  }
+
+  .privacy-content {
+    padding: 1.5rem;
+  }
+
+  .privacy-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

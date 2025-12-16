@@ -1,0 +1,32 @@
+@import '../assets/scss/variables';
+
+.spectra-footer {
+    background-color: #1f2937;
+    padding: 3rem 2rem;
+    color: $white;
+
+    .footer-content {
+        max-width: 1400px;
+        margin: 0 auto;
+        text-align: center;
+    }
+
+    .footer-logo {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+    }
+
+    .footer-logo-img {
+        height: 3rem;
+        width: auto;
+        object-fit: contain;
+    }
+
+    .footer-copyright {
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.8);
+        margin: 0;
+    }
+}

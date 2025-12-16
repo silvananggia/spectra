@@ -1,0 +1,144 @@
+@import '../assets/scss/variables';
+
+.spectra-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    padding: 1rem 2rem;
+    width: 100%;
+
+    .header-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 2rem;
+    }
+
+    .logo {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: $white;
+        font-weight: bold;
+        font-size: 1.5rem;
+
+        .logo-icon {
+            height: 2rem;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .logo-link {
+            text-decoration: none;
+            color: $white;
+        }
+
+        .logo-text {
+            font-weight: 700;
+            letter-spacing: 0.05em;
+        }
+    }
+
+    .header-right {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+    }
+
+    .nav {
+        display: flex;
+        gap: 2rem;
+        align-items: center;
+
+        .nav-link {
+            color: $white;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: opacity 0.3s;
+
+            &:hover {
+                opacity: 0.8;
+            }
+        }
+    }
+
+    .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+
+        .btn-login {
+            background-color: $primary-red;
+            color: $white;
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s;
+
+            &:hover {
+                background-color: darken($primary-red, 10%);
+            }
+        }
+
+        .btn-lang {
+            background: rgba(255, 255, 255, 0.2);
+            color: $white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+
+            &:hover {
+                background: rgba(255, 255, 255, 0.3);
+            }
+
+            .lang-active {
+                font-weight: 600;
+            }
+
+            .lang-inactive {
+                font-weight: 400;
+                opacity: 0.8;
+            }
+        }
+    }
+
+    @media (max-width: 768px) {
+        padding: 1rem;
+
+        .header-container {
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header-right {
+            width: 100%;
+            justify-content: space-between;
+        }
+
+        .nav {
+            gap: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .logo-text {
+            font-size: 1.2rem;
+        }
+
+        .btn-login {
+            padding: 0.4rem 1rem;
+            font-size: 0.9rem;
+        }
+    }
+}

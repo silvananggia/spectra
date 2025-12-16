@@ -3,6 +3,7 @@ import { MapContainer, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import '../assets/style/ColorPalette.css';
+import './MapProducts.scss';
 
 // WMS Server URL
 const WMS_BASE_URL = 'https://spectra.brin.go.id/services/wms';
@@ -446,7 +447,7 @@ const MapViewer = ({ wmsLayers, loading, layerStates, selectedBasemap, onBasemap
     const position = [-2.5, 118];
 
     return (
-        <div style={{ height: '70vh', width: '100%', border: '1px solid #ccc', position: 'relative' }}>
+        <div className="map-viewer">
             {loading && (
                 <div style={{
                     position: 'absolute',
@@ -610,20 +611,15 @@ const MapProducts = () => {
     };
 
     return (
-        <div style={{ padding: '30px 50px' }}>
-            <h1 style={{ color: 'var(--primary-dark-blue)' }}>Produk Peta Interaktif</h1>
-            <p>Visualisasi data berbasis ruang angkasa untuk manajemen dan tanggap darurat bencana.</p>
+        <main className="map-products-page">
+            <div className="map-products-header">
+                <h1>Produk Peta Interaktif</h1>
+                <p>Visualisasi data berbasis ruang angkasa untuk manajemen dan tanggap darurat bencana.</p>
+            </div>
 
             {/* Error Message */}
             {error && (
-                <div style={{
-                    padding: '15px',
-                    marginBottom: '15px',
-                    backgroundColor: '#fee',
-                    border: '1px solid #fcc',
-                    borderRadius: '5px',
-                    color: '#c33'
-                }}>
+                <div className="map-alert map-alert-error">
                     <strong>Error:</strong> {error}
                     <br />
                     <small>WMS Server: {WMS_BASE_URL}</small>
@@ -632,34 +628,27 @@ const MapProducts = () => {
 
             {/* Success Message */}
             {!loading && !error && wmsLayers.length > 0 && (
-                <div style={{
-                    padding: '10px',
-                    marginBottom: '15px',
-                    backgroundColor: '#efe',
-                    border: '1px solid #cfc',
-                    borderRadius: '5px',
-                    color: '#3c3'
-                }}>
+                <div className="map-alert map-alert-success">
                     <strong>✓</strong> Loaded {wmsLayers.length} layer(s) from GeoServer
                 </div>
             )}
 
 
             {/* Map Viewer Area */}
-            <MapViewer 
-                wmsLayers={wmsLayers} 
-                loading={loading}
-                layerStates={layerStates}
-                selectedBasemap={selectedBasemap}
-                onBasemapChange={setSelectedBasemap}
-                onToggleVisibility={handleToggleVisibility}
-                onOpacityChange={handleOpacityChange}
-                onShowAll={handleShowAll}
-                onHideAll={handleHideAll}
-            />
-
-            
-        </div>
+            <div className="map-viewer-container">
+                <MapViewer 
+                    wmsLayers={wmsLayers} 
+                    loading={loading}
+                    layerStates={layerStates}
+                    selectedBasemap={selectedBasemap}
+                    onBasemapChange={setSelectedBasemap}
+                    onToggleVisibility={handleToggleVisibility}
+                    onOpacityChange={handleOpacityChange}
+                    onShowAll={handleShowAll}
+                    onHideAll={handleHideAll}
+                />
+            </div>
+        </main>
     );
 };
 

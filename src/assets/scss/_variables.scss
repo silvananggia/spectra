@@ -1,6 +1,7 @@
 // Color Variables
 $primary-dark-blue: #003366;
 $secondary-cyan: #0099FF;
+$primary-red: #dc2626;
 $text-dark-gray: #333333;
 $bg-light-gray: #F5F5F5;
 $white: #FFFFFF;
@@ -9,6 +10,7 @@ $white: #FFFFFF;
 :root {
     --primary-dark-blue: #{$primary-dark-blue};
     --secondary-cyan: #{$secondary-cyan};
+    --primary-red: #{$primary-red};
     --text-dark-gray: #{$text-dark-gray};
     --bg-light-gray: #{$bg-light-gray};
     --white: #{$white};
