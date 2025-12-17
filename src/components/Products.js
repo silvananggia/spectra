@@ -1,20 +1,34 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import '../assets/style/ColorPalette.css';
 import './Products.scss';
 import axiosInstance from '../api/axios';
 
 const Products = () => {
+    const [searchParams, setSearchParams] = useSearchParams();
+    
     const [previewImage, setPreviewImage] = useState(null);
     const [previewTitle, setPreviewTitle] = useState('');
     const [sortOrder, setSortOrder] = useState('latest'); // 'latest' or 'oldest'
     const [currentPage, setCurrentPage] = useState(1);
-    const [regionFilter, setRegionFilter] = useState('Provinsi Aceh');
-    const [eventTypeFilter, setEventTypeFilter] = useState('Semua kejadian');
+    
+    // Initialize filters from URL query parameters
+    const [regionFilter, setRegionFilter] = useState(searchParams.get('region') || '');
+    const [eventTypeFilter, setEventTypeFilter] = useState(searchParams.get('category') || 'Semua kejadian');
+    
     const [allProducts, setAllProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const itemsPerPage = 9;
+
+    // Update filters when URL query parameters change
+    useEffect(() => {
+        const regionParam = searchParams.get('region') || '';
+        const categoryParam = searchParams.get('category') || 'Semua kejadian';
+        setRegionFilter(regionParam);
+        setEventTypeFilter(categoryParam);
+        setCurrentPage(1); // Reset to first page when filters change
+    }, [searchParams]);
 
     // Fetch products from API
     useEffect(() => {
@@ -22,12 +36,24 @@ const Products = () => {
             try {
                 setLoading(true);
                 setError(null);
-                // Fetch all products with a high limit to get all products
+                
+                // Build query parameters
+                const queryParams = {
+                    page: 1,
+                    limit: 100 // Get all products for client-side filtering
+                };
+                
+                // Add search filters if they exist
+                if (regionFilter && regionFilter.trim() !== '') {
+                    queryParams.region = regionFilter.trim();
+                }
+                if (eventTypeFilter && eventTypeFilter !== 'Semua kejadian') {
+                    queryParams.category = eventTypeFilter;
+                }
+                
+                // Fetch products with search filters
                 const response = await axiosInstance.get('/products', {
-                    params: {
-                        page: 1,
-                        limit: 100 // Get all products
-                    }
+                    params: queryParams
                 });
                 
                 if (response.data.status === 'success' && response.data.data) {
@@ -65,17 +91,10 @@ const Products = () => {
         };
 
         fetchProducts();
-    }, []);
+    }, [regionFilter, eventTypeFilter]);
 
-    // Filter and sort products
-    const filteredProducts = allProducts.filter(product => {
-        if (eventTypeFilter !== 'Semua kejadian' && product.category !== eventTypeFilter) {
-            return false;
-        }
-        return true;
-    });
-
-    const sortedProducts = [...filteredProducts].sort((a, b) => {
+    // Sort products (filtering is now done on backend)
+    const sortedProducts = [...allProducts].sort((a, b) => {
         if (sortOrder === 'latest') {
             return b.releaseDate - a.releaseDate;
         } else {
@@ -131,16 +150,39 @@ const Products = () => {
     }, [previewImage]);
 
     const handleSearch = () => {
+        // Update URL query parameters
+        const newParams = new URLSearchParams();
+        if (regionFilter && regionFilter.trim() !== '') {
+            newParams.set('region', regionFilter.trim());
+        }
+        if (eventTypeFilter && eventTypeFilter !== 'Semua kejadian') {
+            newParams.set('category', eventTypeFilter);
+        }
+        
+        // Update URL without page reload
+        setSearchParams(newParams);
+        
         // Reset to first page when searching
         setCurrentPage(1);
     };
 
+    // Function to format date to Indonesian format (DD Month YYYY)
     const formatDate = (dateString) => {
-        const months = {
-            'November': 'November',
-            'Desember': 'Desember'
-        };
-        return dateString;
+        if (!dateString) return '';
+        
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return dateString; // Return original if invalid date
+        
+        const months = [
+            'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+            'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+        ];
+        
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = months[date.getMonth()];
+        const year = date.getFullYear();
+        
+        return `${day} ${month} ${year}`;
     };
 
     return (
@@ -166,7 +208,7 @@ const Products = () => {
                             value={regionFilter}
                             onChange={(e) => setRegionFilter(e.target.value)}
                             className="form-input"
-                            placeholder="Provinsi Aceh"
+                            placeholder="Masukkan nama daerah"
                         />
                     </div>
                     <div className="form-field">
@@ -255,6 +297,9 @@ const Products = () => {
                                     </div>
                                     <div className="card-content">
                                         <h3 className="card-title">{product.title}</h3>
+                                        {product.date && (
+                                            <p className="card-date">Tanggal Rilis : {formatDate(product.date)}</p>
+                                        )}
                                         <button 
                                             className="btn-access"
                                             onClick={(e) => {

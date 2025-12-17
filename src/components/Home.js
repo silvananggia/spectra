@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import '../assets/style/ColorPalette.css';
 import './Home.scss';
 import axiosInstance from '../api/axios';
@@ -16,6 +16,8 @@ import logoUgm from '../assets/images/logo/mitra/UNIVERSITAS_GADJAH_MADA,_YOGYAK
 import logoUnspider from '../assets/images/logo/mitra/unspider_logo_resc.png';
 
 const Home = () => {
+    const navigate = useNavigate();
+    
     // State for image preview modal
     const [previewImage, setPreviewImage] = useState(null);
     const [previewTitle, setPreviewTitle] = useState('');
@@ -25,6 +27,10 @@ const Home = () => {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const RELEASES_PER_PAGE = 3;
+
+    // State for search form
+    const [regionSearch, setRegionSearch] = useState('');
+    const [eventTypeSearch, setEventTypeSearch] = useState('Semua kejadian');
 
     // Function to handle image preview
     const handleImagePreview = (imageUrl, title) => {
@@ -68,6 +74,43 @@ const Home = () => {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+    };
+
+    // Function to format date to Indonesian format (DD Month YYYY)
+    const formatDate = (dateString) => {
+        if (!dateString) return '';
+        
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return dateString; // Return original if invalid date
+        
+        const months = [
+            'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+            'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+        ];
+        
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = months[date.getMonth()];
+        const year = date.getFullYear();
+        
+        return `${day} ${month} ${year}`;
+    };
+
+    // Function to handle search form submission
+    const handleSearchSubmit = (e) => {
+        e.preventDefault();
+        
+        // Build query parameters
+        const params = new URLSearchParams();
+        if (regionSearch && regionSearch.trim() !== '') {
+            params.append('region', regionSearch.trim());
+        }
+        if (eventTypeSearch && eventTypeSearch !== 'Semua kejadian') {
+            params.append('category', eventTypeSearch);
+        }
+        
+        // Navigate to products page with query parameters
+        const queryString = params.toString();
+        navigate(`/products${queryString ? `?${queryString}` : ''}`);
     };
 
     // Fetch latest products from API
@@ -145,7 +188,7 @@ const Home = () => {
                         </p>
                     </div>
                     <div className="search-form-container">
-                        <div className="search-form">
+                        <form className="search-form" onSubmit={handleSearchSubmit}>
                             <h2 className="search-form-title">Mulai jelajahi data citra</h2>
                             <div className="form-fields">
                                 <div className="form-field">
@@ -153,19 +196,30 @@ const Home = () => {
                                     <input 
                                         type="text" 
                                         id="region" 
+                                        value={regionSearch}
+                                        onChange={(e) => setRegionSearch(e.target.value)}
                                         placeholder="Masukkan nama daerah"
                                         className="form-input"
                                     />
                                 </div>
                                 <div className="form-field">
                                     <label htmlFor="incident">Jenis Kejadian</label>
-                                    <select id="incident" className="form-select">
+                                    <select 
+                                        id="incident" 
+                                        value={eventTypeSearch}
+                                        onChange={(e) => setEventTypeSearch(e.target.value)}
+                                        className="form-select"
+                                    >
                                         <option>Semua kejadian</option>
+                                        <option>Banjir</option>
+                                        <option>Longsor</option>
+                                        <option>QR</option>
+                                        <option>PCS</option>
                                     </select>
                                 </div>
-                                <button className="btn-search">Cari Data</button>
+                                <button type="submit" className="btn-search">Cari Data</button>
                             </div>
-                        </div>
+                        </form>
                     </div>
                 </div>
             </section>
@@ -239,6 +293,9 @@ const Home = () => {
                                         </div>
                                         <div className="card-content">
                                             <h3 className="card-title">{product.title}</h3>
+                                            {product.date && (
+                                                <p className="card-date">Tanggal Rilis : {formatDate(product.date)}</p>
+                                            )}
                                             <button 
                                                 className="btn-access"
                                                 onClick={(e) => {
