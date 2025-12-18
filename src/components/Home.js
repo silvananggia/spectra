@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
 import '../assets/style/ColorPalette.css';
 import './Home.scss';
-import axiosInstance from '../api/axios';
+import { fetchProductsAsync } from '../redux/slices/product';
+import { getDownloadUrl } from '../services/product.service';
 
 // Import partner logos (mitra folder)
 import logoBlackSky from '../assets/images/logo/mitra/blacksky_logo_2021_blackyellow_web.jpg';
@@ -17,6 +19,8 @@ import logoUnspider from '../assets/images/logo/mitra/unspider_logo_resc.png';
 
 const Home = () => {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
+    const { products, loading } = useSelector((state) => state.product);
     
     // State for image preview modal
     const [previewImage, setPreviewImage] = useState(null);
@@ -24,8 +28,6 @@ const Home = () => {
 
     // State for latest releases pagination
     const [releasePage, setReleasePage] = useState(0);
-    const [products, setProducts] = useState([]);
-    const [loading, setLoading] = useState(true);
     const RELEASES_PER_PAGE = 3;
 
     // State for search form
@@ -67,7 +69,7 @@ const Home = () => {
 
     // Function to handle PDF download
     const handleDownload = (productId, filename) => {
-        const downloadUrl = `${process.env.REACT_APP_API_URL || ''}/products/${productId}/download`;
+        const downloadUrl = getDownloadUrl(productId);
         const link = document.createElement('a');
         link.href = downloadUrl;
         link.download = filename;
@@ -113,52 +115,14 @@ const Home = () => {
         navigate(`/products${queryString ? `?${queryString}` : ''}`);
     };
 
-    // Fetch latest products from API
+    // Fetch latest products from API using Redux
     useEffect(() => {
-        const fetchLatestProducts = async () => {
-            try {
-                setLoading(true);
-                // Fetch latest 3 products (or more for pagination)
-                const response = await axiosInstance.get('/products', {
-                    params: {
-                        page: 1,
-                        limit: 10 // Fetch more to allow pagination
-                    }
-                });
-                
-                if (response.data.status === 'success' && response.data.data) {
-                    // Transform API data to match component format
-                    const fetchedProducts = response.data.data.map(product => {
-                        // Construct thumbnail URL from backend
-                        // Use preview endpoint which serves thumbnail if available, otherwise main file
-                        const thumbnailUrl = product.thumbnail 
-                            ? `${process.env.REACT_APP_API_URL || ''}/products/${product.id}/preview`
-                            : null;
-                        
-                        // Format date for display
-                        const dateStr = product.date || '';
-                        
-                        return {
-                            id: product.id,
-                            thumbnail: thumbnailUrl,
-                            title: product.title || 'Untitled',
-                            date: dateStr,
-                            filename: product.filename || ''
-                        };
-                    });
-                    setProducts(fetchedProducts);
-                }
-            } catch (err) {
-                console.error('Error fetching latest products:', err);
-                // Set empty array on error to prevent crashes
-                setProducts([]);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchLatestProducts();
-    }, []);
+        // Fetch latest 10 products (or more for pagination)
+        dispatch(fetchProductsAsync({
+            page: 1,
+            limit: 10,
+        }));
+    }, [dispatch]);
 
     // Partner logos data (mitra logos)
     const partners = [

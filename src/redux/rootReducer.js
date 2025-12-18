@@ -5,13 +5,15 @@ import message from './slices/message';
 import job from './slices/job';
 import map from './slices/map';
 import information from './slices/information';
+import product from './slices/product';
 
 const rootReducer = combineReducers({
     auth,
     message,
     job,
     map,
-    information
+    information,
+    product
 });
 
 export default rootReducer;

@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
 import '../assets/style/ColorPalette.css';
 import './Products.scss';
-import axiosInstance from '../api/axios';
+import { fetchProductsAsync } from '../redux/slices/product';
+import { getDownloadUrl } from '../services/product.service';
 
 const Products = () => {
+    const dispatch = useDispatch();
+    const { products, loading, error, filters } = useSelector((state) => state.product);
     const [searchParams, setSearchParams] = useSearchParams();
     
     const [previewImage, setPreviewImage] = useState(null);
@@ -16,9 +20,6 @@ const Products = () => {
     const [regionFilter, setRegionFilter] = useState(searchParams.get('region') || '');
     const [eventTypeFilter, setEventTypeFilter] = useState(searchParams.get('category') || 'Semua kejadian');
     
-    const [allProducts, setAllProducts] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
     const itemsPerPage = 9;
 
     // Update filters when URL query parameters change
@@ -30,71 +31,26 @@ const Products = () => {
         setCurrentPage(1); // Reset to first page when filters change
     }, [searchParams]);
 
-    // Fetch products from API
+    // Fetch products from API using Redux
     useEffect(() => {
-        const fetchProducts = async () => {
-            try {
-                setLoading(true);
-                setError(null);
-                
-                // Build query parameters
-                const queryParams = {
-                    page: 1,
-                    limit: 100 // Get all products for client-side filtering
-                };
-                
-                // Add search filters if they exist
-                if (regionFilter && regionFilter.trim() !== '') {
-                    queryParams.region = regionFilter.trim();
-                }
-                if (eventTypeFilter && eventTypeFilter !== 'Semua kejadian') {
-                    queryParams.category = eventTypeFilter;
-                }
-                
-                // Fetch products with search filters
-                const response = await axiosInstance.get('/products', {
-                    params: queryParams
-                });
-                
-                if (response.data.status === 'success' && response.data.data) {
-                    // Transform API data to match component format
-                    const products = response.data.data.map(product => {
-                        // Construct thumbnail URL from backend
-                        // Use preview endpoint which serves thumbnail if available, otherwise main file
-                        const thumbnailUrl = product.thumbnail 
-                            ? `${process.env.REACT_APP_API_URL || ''}/products/${product.id}/preview`
-                            : null;
-                        
-                        // Parse date string to Date object for sorting
-                        const releaseDate = product.date ? new Date(product.date) : new Date();
-                        
-                        return {
-                            id: product.id,
-                            thumbnail: thumbnailUrl,
-                            title: product.title || 'Untitled',
-                            date: product.date || '',
-                            releaseDate: releaseDate,
-                            filename: product.filename || '',
-                            category: product.category || 'Unknown'
-                        };
-                    });
-                    setAllProducts(products);
-                } else {
-                    setError('Failed to fetch products');
-                }
-            } catch (err) {
-                console.error('Error fetching products:', err);
-                setError('Failed to fetch products. Please try again later.');
-            } finally {
-                setLoading(false);
-            }
+        const queryParams = {
+            page: 1,
+            limit: 100, // Get all products for client-side filtering
         };
-
-        fetchProducts();
-    }, [regionFilter, eventTypeFilter]);
+        
+        // Add search filters if they exist
+        if (regionFilter && regionFilter.trim() !== '') {
+            queryParams.region = regionFilter.trim();
+        }
+        if (eventTypeFilter && eventTypeFilter !== 'Semua kejadian') {
+            queryParams.category = eventTypeFilter;
+        }
+        
+        dispatch(fetchProductsAsync(queryParams));
+    }, [dispatch, regionFilter, eventTypeFilter]);
 
     // Sort products (filtering is now done on backend)
-    const sortedProducts = [...allProducts].sort((a, b) => {
+    const sortedProducts = [...products].sort((a, b) => {
         if (sortOrder === 'latest') {
             return b.releaseDate - a.releaseDate;
         } else {
@@ -110,7 +66,7 @@ const Products = () => {
 
     // Handle download
     const handleDownload = (productId, filename) => {
-        const downloadUrl = `${process.env.REACT_APP_API_URL || ''}/products/${productId}/download`;
+        const downloadUrl = getDownloadUrl(productId);
         const link = document.createElement('a');
         link.href = downloadUrl;
         link.download = filename;
