@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
+import { useTranslation } from '../utils/i18n';
+import { SkeletonCard } from './Skeleton';
 import '../assets/style/ColorPalette.css';
 import './Home.scss';
 import { fetchProductsAsync } from '../redux/slices/product';
@@ -20,6 +22,7 @@ import logoUnspider from '../assets/images/logo/mitra/unspider_logo_resc.png';
 const Home = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
+    const { t, currentLanguage } = useTranslation();
     const { products, loading } = useSelector((state) => state.product);
     
     // State for image preview modal
@@ -32,7 +35,14 @@ const Home = () => {
 
     // State for search form
     const [regionSearch, setRegionSearch] = useState('');
-    const [eventTypeSearch, setEventTypeSearch] = useState('Semua kejadian');
+    const [eventTypeSearch, setEventTypeSearch] = useState('');
+    
+    // Initialize eventTypeSearch with translation after component mounts
+    useEffect(() => {
+        if (!eventTypeSearch) {
+            setEventTypeSearch(t('home.allEvents'));
+        }
+    }, [t, eventTypeSearch]);
 
     // Function to handle image preview
     const handleImagePreview = (imageUrl, title) => {
@@ -78,23 +88,25 @@ const Home = () => {
         document.body.removeChild(link);
     };
 
-    // Function to format date to Indonesian format (DD Month YYYY)
+    // Function to format date based on language
     const formatDate = (dateString) => {
         if (!dateString) return '';
         
         const date = new Date(dateString);
-        if (isNaN(date.getTime())) return dateString; // Return original if invalid date
+        if (isNaN(date.getTime())) return dateString;
         
-        const months = [
-            'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-            'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
-        ];
-        
-        const day = String(date.getDate()).padStart(2, '0');
-        const month = months[date.getMonth()];
-        const year = date.getFullYear();
-        
-        return `${day} ${month} ${year}`;
+        if (currentLanguage === 'id') {
+            const months = [
+                'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+            ];
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = months[date.getMonth()];
+            const year = date.getFullYear();
+            return `${day} ${month} ${year}`;
+        } else {
+            return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: '2-digit' });
+        }
     };
 
     // Function to handle search form submission
@@ -106,7 +118,7 @@ const Home = () => {
         if (regionSearch && regionSearch.trim() !== '') {
             params.append('region', regionSearch.trim());
         }
-        if (eventTypeSearch && eventTypeSearch !== 'Semua kejadian') {
+        if (eventTypeSearch && eventTypeSearch !== t('home.allEvents')) {
             params.append('category', eventTypeSearch);
         }
         
@@ -144,44 +156,42 @@ const Home = () => {
                 <div className="hero-overlay"></div>
                 <div className="hero-content">
                     <div className="hero-text">
-                        <h1 className="hero-heading">Near-Realtime. Open. Unlimited Insights</h1>
+                        <h1 className="hero-heading">{t('home.heroHeading')}</h1>
                         <p className="hero-description">
-                            SPECTRA adalah Platform Satelit untuk Emergency Crisis Tracking dan Remote Analytics. 
-                            Akses citra satelit berkualitas tinggi, terbarui secara berkala, dan near-realtime untuk 
-                            monitoring bencana, penelitian, rapid response, dan pengambilan keputusan berbasis data.
+                            {t('home.heroDescription')}
                         </p>
                     </div>
                     <div className="search-form-container">
                         <form className="search-form" onSubmit={handleSearchSubmit}>
-                            <h2 className="search-form-title">Mulai jelajahi data citra</h2>
+                            <h2 className="search-form-title">{t('home.searchTitle')}</h2>
                             <div className="form-fields">
                                 <div className="form-field">
-                                    <label htmlFor="region">Nama Daerah</label>
+                                    <label htmlFor="region">{t('home.searchRegion')}</label>
                                     <input 
                                         type="text" 
                                         id="region" 
                                         value={regionSearch}
                                         onChange={(e) => setRegionSearch(e.target.value)}
-                                        placeholder="Masukkan nama daerah"
+                                        placeholder={t('home.searchRegionPlaceholder')}
                                         className="form-input"
                                     />
                                 </div>
                                 <div className="form-field">
-                                    <label htmlFor="incident">Jenis Kejadian</label>
+                                    <label htmlFor="incident">{t('home.searchEventType')}</label>
                                     <select 
                                         id="incident" 
                                         value={eventTypeSearch}
                                         onChange={(e) => setEventTypeSearch(e.target.value)}
                                         className="form-select"
                                     >
-                                        <option>Semua kejadian</option>
-                                        <option>Banjir</option>
-                                        <option>Longsor</option>
+                                        <option>{t('home.allEvents')}</option>
+                                        <option>{t('home.banjir')}</option>
+                                        <option>{t('home.longsor')}</option>
                                         <option>QR</option>
                                         <option>PCS</option>
                                     </select>
                                 </div>
-                                <button type="submit" className="btn-search">Cari Data</button>
+                                <button type="submit" className="btn-search">{t('home.searchButton')}</button>
                             </div>
                         </form>
                     </div>
@@ -192,7 +202,7 @@ const Home = () => {
             <section className="latest-releases">
                 <div className="container">
                     <div className="latest-header">
-                        <h2 className="section-heading">Rilisan Terbaru</h2>
+                        <h2 className="section-heading">{t('home.latestReleases')}</h2>
                         <div className="releases-nav">
                             <button
                                 type="button"
@@ -200,7 +210,7 @@ const Home = () => {
                                 onClick={() => setReleasePage((prev) => Math.max(0, prev - 1))}
                                 disabled={releasePage === 0}
                             >
-                                ← Sebelumnya
+                                ← {t('home.previous')}
                             </button>
                             <button
                                 type="button"
@@ -212,13 +222,13 @@ const Home = () => {
                                 }
                                 disabled={loading || (releasePage + 1) * RELEASES_PER_PAGE >= products.length}
                             >
-                                Selanjutnya →
+                                {t('home.next')} →
                             </button>
                         </div>
                     </div>
                     {loading ? (
-                        <div style={{ textAlign: 'center', padding: '2rem' }}>
-                            <p>Memuat produk terbaru...</p>
+                        <div className="releases-grid">
+                            <SkeletonCard count={RELEASES_PER_PAGE} />
                         </div>
                     ) : (
                         <div className="releases-grid">
@@ -258,7 +268,7 @@ const Home = () => {
                                         <div className="card-content">
                                             <h3 className="card-title">{product.title}</h3>
                                             {product.date && (
-                                                <p className="card-date">Tanggal Rilis : {formatDate(product.date)}</p>
+                                                <p className="card-date">{t('products.date')}: {formatDate(product.date)}</p>
                                             )}
                                             <button 
                                                 className="btn-access"
@@ -267,14 +277,14 @@ const Home = () => {
                                                     handleDownload(product.id, product.filename);
                                                 }}
                                             >
-                                                Akses Data
+                                                {t('home.access')}
                                             </button>
                                         </div>
                                     </div>
                                 ))
                             ) : (
                                 <div style={{ textAlign: 'center', padding: '2rem' }}>
-                                    <p>Tidak ada produk terbaru</p>
+                                    <p>{t('products.noResults')}</p>
                                 </div>
                             )}
                         </div>
@@ -287,19 +297,19 @@ const Home = () => {
                 <div className="map-overlay"></div>
                 <div className="container map-container">
                     <div className="map-content">
-                        <h2 className="map-heading">SPECTRA Interactive Map</h2>
+                        <h2 className="map-heading">{t('home.interactiveMap')}</h2>
                         <p className="map-description">
-                            Lihat, zoom, analisis. Akses detail data dan informasi yang Anda butuhkan secara instan.
+                            {t('home.interactiveMapDesc')}
                         </p>
                     </div>
-                    <Link to="/maps" className="btn-map-cta">Akses Sekarang →</Link>
+                    <Link to="/maps" className="btn-map-cta">{t('home.accessMap')} →</Link>
                 </div>
             </section>
 
             {/* Collaboration Partners Section */}
             <section className="partners">
                 <div className="container">
-                    <h2 className="section-heading partners-heading">Mitra Kolaborasi</h2>
+                    <h2 className="section-heading partners-heading">{t('home.partners')}</h2>
                     <div className="partners-grid">
                         {partners.map((partner) => (
                             <div key={partner.id} className="partner-logo">
@@ -331,7 +341,7 @@ const Home = () => {
                             className="preview-image"
                         />
                         <p className="preview-instruction">
-                            Tekan ESC atau klik di luar gambar untuk menutup
+                            {t('home.pressEscape')} {t('home.clickToClose')}
                         </p>
                     </div>
                 </div>

@@ -1,4 +1,5 @@
 @import '../assets/scss/variables';
+@import '../assets/scss/mixins';
 
 .privacy-page {
   padding-top: 80px;
@@ -130,31 +131,118 @@
 }
 
 // Responsive
-@media (max-width: 1024px) {
+// Mobile (< 576px)
+@include mobile-only {
+  .privacy-page {
+    padding-top: 120px;
+  }
+
   .privacy-container {
+    padding: 1.5rem 1rem;
     grid-template-columns: minmax(0, 1fr);
   }
 
   .privacy-sidebar {
     order: -1;
-  }
-}
-
-@media (max-width: 768px) {
-  .privacy-page {
-    padding-top: 100px;
-  }
-
-  .privacy-container {
-    padding: 1.5rem 1rem;
-  }
-
-  .privacy-content {
-    padding: 1.5rem;
+    margin-bottom: 1.5rem;
   }
 
   .privacy-header {
     flex-direction: column;
     align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .privacy-hero-icon {
+    width: 80px;
+    height: 80px;
+  }
+
+  .privacy-title {
+    font-size: 1.75rem;
+  }
+
+  .privacy-updated {
+    font-size: 0.85rem;
+  }
+
+  .privacy-content {
+    padding: 1.25rem;
+  }
+
+  .privacy-section {
+    margin-bottom: 1.5rem;
+
+    p {
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    li {
+      font-size: 0.9rem;
+    }
+  }
+
+  .section-heading {
+    font-size: 1rem;
+  }
+
+  .sidebar-card {
+    position: static;
+    padding: 0.75rem 0;
+  }
+
+  .sidebar-item {
+    padding: 0.65rem 1.25rem;
+    font-size: 0.85rem;
+  }
+}
+
+// Tablet (576px - 767px)
+@include respond-to-range('tablet', 'laptop') {
+  .privacy-page {
+    padding-top: 110px;
+  }
+
+  .privacy-container {
+    padding: 1.75rem 1.5rem;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .privacy-sidebar {
+    order: -1;
+    margin-bottom: 2rem;
+  }
+
+  .privacy-title {
+    font-size: 2rem;
+  }
+
+  .privacy-content {
+    padding: 1.75rem;
+  }
+}
+
+// Laptop (768px - 1023px)
+@include respond-to-range('laptop', 'desktop') {
+  .privacy-container {
+    grid-template-columns: minmax(0, 3fr) 280px;
+    gap: 1.5rem;
+  }
+
+  .sidebar-card {
+    top: 110px;
+  }
+}
+
+// Desktop (1024px+)
+@include desktop-up {
+  .privacy-container {
+    grid-template-columns: minmax(0, 3fr) 320px;
+  }
+
+  .sidebar-card {
+    top: 96px;
   }
 }

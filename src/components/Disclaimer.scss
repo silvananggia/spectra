@@ -1,0 +1,223 @@
+@import '../assets/scss/variables';
+@import '../assets/scss/mixins';
+
+.disclaimer-page {
+  padding-top: 80px;
+  min-height: 100vh;
+  background: $bg-light-gray;
+  padding-bottom: 2rem;
+}
+
+.disclaimer-container {
+  max-width: 900px;
+  margin: 0 auto;
+  background: $white;
+  padding: 40px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.disclaimer-title {
+  color: $primary-dark-blue;
+  margin-bottom: 30px;
+  font-size: 2.5em;
+  text-align: center;
+  font-weight: 700;
+}
+
+.warning-box {
+  padding: 20px;
+  background-color: #fff3cd;
+  border-radius: 5px;
+  margin-bottom: 30px;
+  border-left: 4px solid #ffc107;
+}
+
+.warning-text {
+  margin: 0;
+  font-weight: bold;
+  color: #856404;
+}
+
+.disclaimer-content {
+  line-height: 1.8;
+  color: #333;
+}
+
+.disclaimer-section {
+  margin-bottom: 30px;
+}
+
+.disclaimer-section-title {
+  color: $secondary-cyan;
+  margin-bottom: 15px;
+  font-size: 1.5em;
+  font-weight: 600;
+}
+
+.disclaimer-subsection-title {
+  color: #666;
+  margin-bottom: 10px;
+  font-size: 1.2em;
+  font-weight: 600;
+  margin-top: 20px;
+}
+
+.disclaimer-text {
+  margin-bottom: 15px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.disclaimer-list {
+  margin-left: 30px;
+  margin-bottom: 15px;
+  padding-left: 0;
+  list-style-position: inside;
+}
+
+.disclaimer-list-item {
+  margin-bottom: 8px;
+}
+
+.info-highlight-box {
+  margin-top: 15px;
+  padding: 15px;
+  background-color: #e7f3ff;
+  border-radius: 5px;
+  border-left: 4px solid $secondary-cyan;
+}
+
+.danger-box {
+  margin-top: 40px;
+  padding: 20px;
+  background-color: #ffe6e6;
+  border-radius: 5px;
+  border-left: 4px solid #dc3545;
+}
+
+.danger-text {
+  margin: 0;
+  font-weight: bold;
+  color: #721c24;
+}
+
+.update-box {
+  margin-top: 30px;
+  padding: 20px;
+  background: $bg-light-gray;
+  border-radius: 5px;
+  border-left: 4px solid $secondary-cyan;
+}
+
+.update-text {
+  margin: 0;
+  font-style: italic;
+  color: #666;
+}
+
+// Responsive Design
+// Mobile (< 576px)
+@include mobile-only {
+  .disclaimer-page {
+    padding-top: 120px;
+    padding: 120px 1rem 2rem 1rem;
+  }
+
+  .disclaimer-container {
+    padding: 1.5rem;
+  }
+
+  .disclaimer-title {
+    font-size: 1.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .warning-box {
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .warning-text {
+    font-size: 0.9em;
+  }
+
+  .disclaimer-section {
+    margin-bottom: 1.5rem;
+  }
+
+  .disclaimer-section-title {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+  }
+
+  .disclaimer-subsection-title {
+    font-size: 1.1em;
+    margin-top: 1rem;
+  }
+
+  .disclaimer-text {
+    font-size: 0.9em;
+    margin-bottom: 1rem;
+  }
+
+  .disclaimer-list {
+    margin-left: 1.25rem;
+    margin-bottom: 1rem;
+  }
+
+  .disclaimer-list-item {
+    font-size: 0.9em;
+    margin-bottom: 0.6rem;
+  }
+
+  .info-highlight-box {
+    padding: 1rem;
+    margin-top: 1rem;
+    font-size: 0.9em;
+  }
+
+  .danger-box {
+    margin-top: 2rem;
+    padding: 1rem;
+  }
+
+  .danger-text {
+    font-size: 0.9em;
+  }
+
+  .update-box {
+    margin-top: 1.5rem;
+    padding: 1rem;
+  }
+
+  .update-text {
+    font-size: 0.85em;
+  }
+}
+
+// Tablet (576px - 767px)
+@include respond-to-range('tablet', 'laptop') {
+  .disclaimer-page {
+    padding-top: 110px;
+    padding: 110px 1.5rem 2rem 1.5rem;
+  }
+
+  .disclaimer-container {
+    padding: 2rem;
+  }
+
+  .disclaimer-title {
+    font-size: 2rem;
+  }
+}
+
+// Laptop (768px - 1023px)
+@include respond-to-range('laptop', 'desktop') {
+  .disclaimer-title {
+    font-size: 2.25rem;
+  }
+}
+

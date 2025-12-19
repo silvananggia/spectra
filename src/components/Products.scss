@@ -1,4 +1,5 @@
 @import '../assets/scss/variables';
+@import '../assets/scss/mixins';
 
 .products-page {
     padding-top: 80px; // Account for fixed header
@@ -392,25 +393,21 @@
 }
 
 // Responsive Design
-@media (max-width: 1024px) {
-    .search-container {
-        grid-template-columns: 1fr;
-    }
-}
-
-@media (max-width: 768px) {
+// Mobile (< 576px)
+@include mobile-only {
     .products-page {
-        padding-top: 100px;
+        padding-top: 120px;
     }
 
     .breadcrumbs {
         padding: 1.5rem 1rem 0.5rem 1rem;
-        font-size: 0.85rem;
+        font-size: 0.8rem;
+        flex-wrap: wrap;
     }
 
     .page-title {
         padding: 0 1rem;
-        font-size: 2rem;
+        font-size: 1.75rem;
         margin-bottom: 1.5rem;
     }
 
@@ -422,11 +419,23 @@
     }
 
     .search-container {
-        padding: 1.5rem;
-    }
-
-    .products-grid {
+        padding: 1rem;
         grid-template-columns: 1fr;
+
+        .form-field label {
+            font-size: 0.85rem;
+        }
+
+        .form-input,
+        .form-select {
+            padding: 0.65rem 0.9rem;
+            font-size: 0.9rem;
+        }
+
+        .btn-search {
+            padding: 0.65rem 1.5rem;
+            font-size: 0.9rem;
+        }
     }
 
     .filter-tabs {
@@ -436,30 +445,43 @@
         .filter-tab {
             width: 100%;
             justify-content: center;
+            padding: 0.65rem 1.25rem;
+            font-size: 0.9rem;
+        }
+    }
+
+    .products-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+
+        .release-card {
+            .card-image {
+                height: 180px;
+            }
+
+            .card-content {
+                padding: 1.25rem;
+            }
+
+            .card-title {
+                font-size: 1.1rem;
+            }
+
+            .card-text {
+                font-size: 0.9rem;
+            }
+
+            .btn-access {
+                padding: 0.65rem 1.25rem;
+                font-size: 0.9rem;
+            }
         }
     }
 
     .pagination-section {
         gap: 0.5rem;
+        padding: 0 1rem;
 
-        .pagination-number {
-            min-width: 2rem;
-            height: 2rem;
-            font-size: 0.85rem;
-        }
-    }
-}
-
-@media (max-width: 480px) {
-    .page-title {
-        font-size: 1.75rem;
-    }
-
-    .search-container {
-        padding: 1rem;
-    }
-
-    .pagination-section {
         .pagination-btn {
             font-size: 0.85rem;
             padding: 0.4rem 0.75rem;
@@ -470,5 +492,70 @@
             height: 1.75rem;
             font-size: 0.8rem;
         }
+    }
+
+    .preview-modal {
+        padding: 10px;
+
+        .preview-content {
+            max-width: 95%;
+
+            .preview-title {
+                font-size: 1.2em;
+            }
+
+            .preview-close {
+                top: -30px;
+                font-size: 1.5em;
+            }
+        }
+    }
+}
+
+// Tablet (576px - 767px)
+@include respond-to-range('tablet', 'laptop') {
+    .products-page {
+        padding-top: 110px;
+    }
+
+    .page-title {
+        font-size: 2rem;
+    }
+
+    .search-container {
+        grid-template-columns: 1fr;
+        padding: 1.25rem;
+    }
+
+    .products-grid {
+        grid-template-columns: 1fr;
+        gap: 1.75rem;
+    }
+}
+
+// Laptop (768px - 1023px)
+@include respond-to-range('laptop', 'desktop') {
+    .search-container {
+        grid-template-columns: 2fr 1fr;
+        gap: 1rem;
+
+        .btn-search {
+            align-self: end;
+        }
+    }
+
+    .products-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+// Desktop (1024px+)
+@include desktop-up {
+    .search-container {
+        grid-template-columns: 2fr 2fr 1fr;
+    }
+
+    .products-grid {
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
     }
 }

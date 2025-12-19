@@ -1,4 +1,5 @@
 @import '../assets/scss/variables';
+@import '../assets/scss/mixins';
 
 .spectra-footer {
     background-color: #1f2937;
@@ -28,5 +29,47 @@
         font-size: 0.9rem;
         color: rgba(255, 255, 255, 0.8);
         margin: 0;
+    }
+}
+
+// Responsive Design
+// Mobile (< 576px)
+@include mobile-only {
+    .spectra-footer {
+        padding: 2rem 1rem;
+
+        .footer-content {
+            .footer-logo {
+                margin-bottom: 0.75rem;
+            }
+
+            .footer-logo-img {
+                height: 2.5rem;
+            }
+
+            .footer-copyright {
+                font-size: 0.85rem;
+            }
+        }
+    }
+}
+
+// Tablet (576px - 767px)
+@include respond-to-range('tablet', 'laptop') {
+    .spectra-footer {
+        padding: 2.5rem 1.5rem;
+
+        .footer-content {
+            .footer-logo-img {
+                height: 2.75rem;
+            }
+        }
+    }
+}
+
+// Desktop (1024px+)
+@include desktop-up {
+    .spectra-footer {
+        padding: 3rem 2rem;
     }
 }

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
+import { useTranslation } from '../utils/i18n';
+import { SkeletonCard } from './Skeleton';
 import '../assets/style/ColorPalette.css';
 import './Products.scss';
 import { fetchProductsAsync } from '../redux/slices/product';
@@ -8,6 +10,7 @@ import { getDownloadUrl } from '../services/product.service';
 
 const Products = () => {
     const dispatch = useDispatch();
+    const { t, currentLanguage } = useTranslation();
     const { products, loading, error, filters } = useSelector((state) => state.product);
     const [searchParams, setSearchParams] = useSearchParams();
     
@@ -18,18 +21,18 @@ const Products = () => {
     
     // Initialize filters from URL query parameters
     const [regionFilter, setRegionFilter] = useState(searchParams.get('region') || '');
-    const [eventTypeFilter, setEventTypeFilter] = useState(searchParams.get('category') || 'Semua kejadian');
+    const [eventTypeFilter, setEventTypeFilter] = useState(searchParams.get('category') || t('products.allEvents'));
     
     const itemsPerPage = 9;
 
     // Update filters when URL query parameters change
     useEffect(() => {
         const regionParam = searchParams.get('region') || '';
-        const categoryParam = searchParams.get('category') || 'Semua kejadian';
+        const categoryParam = searchParams.get('category') || t('products.allEvents');
         setRegionFilter(regionParam);
         setEventTypeFilter(categoryParam);
         setCurrentPage(1); // Reset to first page when filters change
-    }, [searchParams]);
+    }, [searchParams, t]);
 
     // Fetch products from API using Redux
     useEffect(() => {
@@ -42,7 +45,7 @@ const Products = () => {
         if (regionFilter && regionFilter.trim() !== '') {
             queryParams.region = regionFilter.trim();
         }
-        if (eventTypeFilter && eventTypeFilter !== 'Semua kejadian') {
+        if (eventTypeFilter && eventTypeFilter !== t('products.allEvents')) {
             queryParams.category = eventTypeFilter;
         }
         
@@ -111,7 +114,7 @@ const Products = () => {
         if (regionFilter && regionFilter.trim() !== '') {
             newParams.set('region', regionFilter.trim());
         }
-        if (eventTypeFilter && eventTypeFilter !== 'Semua kejadian') {
+        if (eventTypeFilter && eventTypeFilter !== t('products.allEvents')) {
             newParams.set('category', eventTypeFilter);
         }
         
@@ -122,68 +125,70 @@ const Products = () => {
         setCurrentPage(1);
     };
 
-    // Function to format date to Indonesian format (DD Month YYYY)
+    // Function to format date based on language
     const formatDate = (dateString) => {
         if (!dateString) return '';
         
         const date = new Date(dateString);
-        if (isNaN(date.getTime())) return dateString; // Return original if invalid date
+        if (isNaN(date.getTime())) return dateString;
         
-        const months = [
-            'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-            'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
-        ];
-        
-        const day = String(date.getDate()).padStart(2, '0');
-        const month = months[date.getMonth()];
-        const year = date.getFullYear();
-        
-        return `${day} ${month} ${year}`;
+        if (currentLanguage === 'id') {
+            const months = [
+                'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+            ];
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = months[date.getMonth()];
+            const year = date.getFullYear();
+            return `${day} ${month} ${year}`;
+        } else {
+            return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: '2-digit' });
+        }
     };
 
     return (
         <main className="products-page">
             {/* Breadcrumbs */}
             <div className="breadcrumbs">
-                <Link to="/">Home</Link>
+                <Link to="/">{t('products.breadcrumbHome')}</Link>
                 <span className="breadcrumb-separator">/</span>
-                <span className="breadcrumb-current">Produk Spectra</span>
+                <span className="breadcrumb-current">{t('products.breadcrumbProducts')}</span>
             </div>
 
             {/* Page Title */}
-            <h1 className="page-title">Produk Spectra</h1>
+            <h1 className="page-title">{t('products.title')}</h1>
 
             {/* Search and Filter Section */}
             <section className="search-section">
                 <div className="search-container">
                     <div className="form-field">
-                        <label htmlFor="region">Nama Daerah</label>
+                        <label htmlFor="region">{t('products.searchRegion')}</label>
                         <input 
                             type="text" 
                             id="region" 
                             value={regionFilter}
                             onChange={(e) => setRegionFilter(e.target.value)}
                             className="form-input"
-                            placeholder="Masukkan nama daerah"
+                            placeholder={t('products.searchPlaceholder')}
                         />
                     </div>
                     <div className="form-field">
-                        <label htmlFor="incident">Jenis Kejadian</label>
+                        <label htmlFor="incident">{t('products.searchEventType')}</label>
                         <select 
                             id="incident" 
                             value={eventTypeFilter}
                             onChange={(e) => setEventTypeFilter(e.target.value)}
                             className="form-select"
                         >
-                            <option>Semua kejadian</option>
-                            <option>Banjir</option>
-                            <option>Longsor</option>
+                            <option>{t('products.allEvents')}</option>
+                            <option>{t('home.banjir')}</option>
+                            <option>{t('home.longsor')}</option>
                             <option>QR</option>
-                             <option>PCS</option>
+                            <option>PCS</option>
                         </select>
                     </div>
                     <button className="btn-search" onClick={handleSearch}>
-                        Cari Data
+                        {t('common.search')}
                     </button>
                 </div>
             </section>
@@ -198,7 +203,7 @@ const Products = () => {
                     }}
                 >
                     <span className="tab-icon">✓</span>
-                    Terbaru
+                    {t('products.latest')}
                 </button>
                 <button 
                     className={`filter-tab ${sortOrder === 'oldest' ? 'active' : ''}`}
@@ -207,15 +212,15 @@ const Products = () => {
                         setCurrentPage(1);
                     }}
                 >
-                    Terlama
+                    {t('products.oldest')}
                 </button>
             </section>
 
             {/* Products Grid */}
             <section className="products-grid-section">
                 {loading ? (
-                    <div style={{ textAlign: 'center', padding: '2rem' }}>
-                        <p>Memuat produk...</p>
+                    <div className="products-grid">
+                        <SkeletonCard count={itemsPerPage} />
                     </div>
                 ) : error ? (
                     <div style={{ textAlign: 'center', padding: '2rem', color: 'red' }}>
@@ -254,7 +259,7 @@ const Products = () => {
                                     <div className="card-content">
                                         <h3 className="card-title">{product.title}</h3>
                                         {product.date && (
-                                            <p className="card-date">Tanggal Rilis : {formatDate(product.date)}</p>
+                                            <p className="card-date">{t('products.releaseDate')}: {formatDate(product.date)}</p>
                                         )}
                                         <button 
                                             className="btn-access"
@@ -263,14 +268,14 @@ const Products = () => {
                                                 handleDownload(product.id, product.filename);
                                             }}
                                         >
-                                            Akses Data
+                                            {t('products.access')}
                                         </button>
                                     </div>
                                 </div>
                             ))
                         ) : (
                             <div style={{ textAlign: 'center', padding: '2rem' }}>
-                                <p>Tidak ada produk ditemukan</p>
+                                <p>{t('products.noResults')}</p>
                             </div>
                         )}
                     </div>
@@ -285,7 +290,7 @@ const Products = () => {
                         onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                         disabled={currentPage === 1}
                     >
-                        ← Sebelumnya
+                        ← {t('common.previous')}
                     </button>
                     <div className="pagination-numbers">
                         {currentPage > 3 && (
@@ -337,7 +342,7 @@ const Products = () => {
                         onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                         disabled={currentPage === totalPages}
                     >
-                        Selanjutnya →
+                        {t('common.next')} →
                     </button>
                 </section>
             )}
@@ -360,7 +365,7 @@ const Products = () => {
                             className="preview-image"
                         />
                         <p className="preview-instruction">
-                            Tekan ESC atau klik di luar gambar untuk menutup
+                            {t('products.pressEscape')} {t('products.clickToClose')}
                         </p>
                     </div>
                 </div>
