@@ -250,15 +250,8 @@ const MVTLayer = ({ url, style, opacity = 0.7, visible = true, zIndex = 100, att
   const map = useMap();
   const layerRef = useRef(null);
 
+  // Create layer only when URL or style changes (not when visible/opacity changes)
   useEffect(() => {
-    if (!visible) {
-      if (layerRef.current && map.hasLayer(layerRef.current)) {
-        map.removeLayer(layerRef.current);
-        layerRef.current = null;
-      }
-      return;
-    }
-
     // Wait for vectorgrid to be loaded with max retries
     let retryCount = 0;
     const maxRetries = 50; // 5 seconds max (50 * 100ms)
@@ -275,6 +268,12 @@ const MVTLayer = ({ url, style, opacity = 0.7, visible = true, zIndex = 100, att
         return;
       }
 
+      // Remove existing layer if any
+      if (layerRef.current && map.hasLayer(layerRef.current)) {
+        map.removeLayer(layerRef.current);
+        layerRef.current = null;
+      }
+
       try {
         // Parse style if provided
         let styleConfig = {};
@@ -287,27 +286,35 @@ const MVTLayer = ({ url, style, opacity = 0.7, visible = true, zIndex = 100, att
           }
         }
 
-        // Default style for vector tiles
+        // Default style for vector tiles - make it more visible
         const defaultStyle = {
           fill: true,
           fillColor: styleConfig.fillColor || styleConfig.fill || '#3388ff',
-          fillOpacity: styleConfig.fillOpacity !== undefined ? styleConfig.fillOpacity : opacity * 0.3,
+          fillOpacity: styleConfig.fillOpacity !== undefined ? styleConfig.fillOpacity : Math.max(opacity * 0.5, 0.3), // At least 30% visible
           stroke: true,
           color: styleConfig.color || styleConfig.stroke || '#3388ff',
           weight: styleConfig.weight || styleConfig.strokeWidth || 2,
-          opacity: styleConfig.opacity !== undefined ? styleConfig.opacity : opacity,
+          opacity: styleConfig.opacity !== undefined ? styleConfig.opacity : Math.max(opacity, 0.7), // At least 70% visible
         };
 
         // Create vector tile layer
         // Martin tiles use format: {url}/{z}/{x}/{y}.pbf
         // Other servers might use: {url}/{z}/{x}/{y}.mvt
-        const tileUrl = url.includes('{z}') ? url : `${url}/{z}/{x}/{y}.pbf`;
+        let tileUrl = url.trim();
+        if (!tileUrl.includes('{z}')) {
+          // Ensure URL ends with / if it doesn't have template
+          tileUrl = tileUrl.endsWith('/') ? tileUrl : tileUrl + '/';
+          tileUrl = `${tileUrl}{z}/{x}/{y}.pbf`;
+        }
+
+        console.log('Creating MVT layer with URL:', tileUrl, 'Style:', defaultStyle);
 
         const vectorLayer = L.vectorGrid.protobuf(tileUrl, {
           attribution: attribution || '',
           opacity: opacity,
           zIndex: zIndex,
           maxZoom: 19,
+          minZoom: 0,
           // Vector tile styling
           getFeatureId: function(f) {
             return f.properties.id || f.properties.osm_id || f.properties.gid;
@@ -352,7 +359,20 @@ const MVTLayer = ({ url, style, opacity = 0.7, visible = true, zIndex = 100, att
         }
 
         layerRef.current = vectorLayer;
-        vectorLayer.addTo(map);
+        
+        // Only add to map if visible
+        if (visible) {
+          vectorLayer.addTo(map);
+          console.log('MVT layer added to map:', {
+            url: tileUrl,
+            visible: visible,
+            opacity: opacity,
+            zIndex: zIndex,
+            style: defaultStyle
+          });
+        } else {
+          console.log('MVT layer created but not added (visible=false):', tileUrl);
+        }
       } catch (error) {
         console.error('Error creating MVT layer:', error);
       }
@@ -366,22 +386,24 @@ const MVTLayer = ({ url, style, opacity = 0.7, visible = true, zIndex = 100, att
         layerRef.current = null;
       }
     };
-  }, [map, url, style, visible, opacity, zIndex, attribution]);
+  }, [map, url, style, zIndex, attribution]); // Removed visible and opacity from dependencies
 
+  // Handle visibility changes separately
   useEffect(() => {
-    if (layerRef.current) {
-      if (visible) {
-        if (!map.hasLayer(layerRef.current)) {
-          layerRef.current.addTo(map);
-        }
-      } else {
-        if (map.hasLayer(layerRef.current)) {
-          map.removeLayer(layerRef.current);
-        }
+    if (!layerRef.current) return;
+
+    if (visible) {
+      if (!map.hasLayer(layerRef.current)) {
+        layerRef.current.addTo(map);
+      }
+    } else {
+      if (map.hasLayer(layerRef.current)) {
+        map.removeLayer(layerRef.current);
       }
     }
   }, [map, visible]);
 
+  // Handle opacity changes separately
   useEffect(() => {
     if (layerRef.current) {
       layerRef.current.setOpacity(opacity);
