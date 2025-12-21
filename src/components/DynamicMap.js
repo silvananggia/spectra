@@ -365,6 +365,12 @@ const MVTLayer = ({ url, style, opacity = 0.7, visible = true, zIndex = 100, att
         // Martin tiles use format: {url}/{z}/{x}/{y}.pbf
         // Other servers might use: {url}/{z}/{x}/{y}.mvt
         let tileUrl = url.trim();
+        
+        // Fix HTTP to HTTPS for spectra.brin.go.id (Martin returns http:// but should be https://)
+        if (tileUrl.startsWith('http://spectra.brin.go.id')) {
+          tileUrl = tileUrl.replace('http://', 'https://');
+        }
+        
         if (!tileUrl.includes('{z}')) {
           // Ensure URL ends with / if it doesn't have template
           tileUrl = tileUrl.endsWith('/') ? tileUrl : tileUrl + '/';
