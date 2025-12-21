@@ -43,18 +43,35 @@ const WMSTileLayer = ({ url, layerName, opacity = 0.7, visible = true, zIndex = 
   const map = useMap();
   const layerRef = useRef(null);
 
+  // Create layer only when URL or layerName changes (not when visible/opacity changes)
   useEffect(() => {
-    if (!layerRef.current && visible) {
+    // Remove existing layer if any
+    if (layerRef.current && map.hasLayer(layerRef.current)) {
+      map.removeLayer(layerRef.current);
+      layerRef.current = null;
+    }
+
+    if (!url || !layerName) return;
+
+    try {
       const wmsLayer = L.tileLayer.wms(url, {
         layers: layerName,
         format: 'image/png',
         transparent: true,
         opacity: opacity,
         version: '1.1.0',
-        zIndex: zIndex
+        zIndex: zIndex,
+        crossOrigin: true // Enable CORS for cross-origin requests
       });
+
       layerRef.current = wmsLayer;
-      wmsLayer.addTo(map);
+      
+      // Only add to map if visible
+      if (visible) {
+        wmsLayer.addTo(map);
+      }
+    } catch (error) {
+      console.error('Error creating WMS layer:', error);
     }
 
     return () => {
@@ -63,22 +80,24 @@ const WMSTileLayer = ({ url, layerName, opacity = 0.7, visible = true, zIndex = 
         layerRef.current = null;
       }
     };
-  }, [map, url, layerName]);
+  }, [map, url, layerName, zIndex]); // Removed visible and opacity from dependencies
 
+  // Handle visibility changes separately
   useEffect(() => {
-    if (layerRef.current) {
-      if (visible) {
-        if (!map.hasLayer(layerRef.current)) {
-          layerRef.current.addTo(map);
-        }
-      } else {
-        if (map.hasLayer(layerRef.current)) {
-          map.removeLayer(layerRef.current);
-        }
+    if (!layerRef.current) return;
+
+    if (visible) {
+      if (!map.hasLayer(layerRef.current)) {
+        layerRef.current.addTo(map);
+      }
+    } else {
+      if (map.hasLayer(layerRef.current)) {
+        map.removeLayer(layerRef.current);
       }
     }
   }, [map, visible]);
 
+  // Handle opacity changes separately
   useEffect(() => {
     if (layerRef.current) {
       layerRef.current.setOpacity(opacity);
@@ -93,15 +112,58 @@ const XYZTileLayer = ({ url, opacity = 0.7, visible = true, zIndex = 100, attrib
   const map = useMap();
   const layerRef = useRef(null);
 
+  // Create layer only when URL changes (not when visible/opacity changes)
   useEffect(() => {
-    if (!layerRef.current && visible) {
+    // Remove existing layer if any
+    if (layerRef.current && map.hasLayer(layerRef.current)) {
+      map.removeLayer(layerRef.current);
+      layerRef.current = null;
+    }
+
+    if (!url) return;
+
+    try {
+      // gdal2tiles generates TMS format tiles (Y coordinate needs to be flipped)
+      // Check if URL is from spectra.brin.go.id/tiles (gdal2tiles output)
+      const isTMS = url.includes('spectra.brin.go.id/tiles') || 
+                    url.includes('/tiles/') && !url.includes('tms=false');
+      
       const xyzLayer = L.tileLayer(url, {
-        attribution: attribution,
+        attribution: attribution || '',
         opacity: opacity,
-        zIndex: zIndex
+        zIndex: zIndex,
+        maxZoom: 19,
+        minZoom: 0,
+        crossOrigin: true, // Enable CORS for cross-origin requests
+        tms: isTMS // Enable TMS format for gdal2tiles (flips Y coordinate)
       });
+      
+      if (isTMS) {
+        console.log('Using TMS format for tile layer:', url);
+      }
+
       layerRef.current = xyzLayer;
-      xyzLayer.addTo(map);
+      
+      // Add error handling for tile loading
+      xyzLayer.on('tileerror', function(error, tile) {
+        console.warn('XYZ tile error:', {
+          url: tile?.src || url,
+          error: error,
+          isTMS: isTMS
+        });
+      });
+      
+      // Only add to map if visible
+      if (visible) {
+        xyzLayer.addTo(map);
+        console.log('XYZ layer added to map:', {
+          url: url,
+          isTMS: isTMS,
+          visible: visible
+        });
+      }
+    } catch (error) {
+      console.error('Error creating XYZ layer:', error);
     }
 
     return () => {
@@ -110,22 +172,24 @@ const XYZTileLayer = ({ url, opacity = 0.7, visible = true, zIndex = 100, attrib
         layerRef.current = null;
       }
     };
-  }, [map, url, attribution]);
+  }, [map, url, zIndex, attribution]); // Removed visible and opacity from dependencies
 
+  // Handle visibility changes separately
   useEffect(() => {
-    if (layerRef.current) {
-      if (visible) {
-        if (!map.hasLayer(layerRef.current)) {
-          layerRef.current.addTo(map);
-        }
-      } else {
-        if (map.hasLayer(layerRef.current)) {
-          map.removeLayer(layerRef.current);
-        }
+    if (!layerRef.current) return;
+
+    if (visible) {
+      if (!map.hasLayer(layerRef.current)) {
+        layerRef.current.addTo(map);
+      }
+    } else {
+      if (map.hasLayer(layerRef.current)) {
+        map.removeLayer(layerRef.current);
       }
     }
   }, [map, visible]);
 
+  // Handle opacity changes separately
   useEffect(() => {
     if (layerRef.current) {
       layerRef.current.setOpacity(opacity);
@@ -315,6 +379,8 @@ const MVTLayer = ({ url, style, opacity = 0.7, visible = true, zIndex = 100, att
           zIndex: zIndex,
           maxZoom: 19,
           minZoom: 0,
+          // CORS handling
+          crossOrigin: true,
           // Vector tile styling
           getFeatureId: function(f) {
             return f.properties.id || f.properties.osm_id || f.properties.gid;
