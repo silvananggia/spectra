@@ -18,6 +18,12 @@ import logoUndip from '../assets/images/logo/mitra/Logo_Universitas_Diponegoro.p
 import logoUnitSE from '../assets/images/logo/mitra/UnitSE_Posi_White.jpg';
 import logoUgm from '../assets/images/logo/mitra/UNIVERSITAS_GADJAH_MADA,_YOGYAKARTA.png';
 import logoUnspider from '../assets/images/logo/mitra/unspider_logo_resc.png';
+import logoFlyForHumanity from '../assets/images/logo/mitra/logo_flyforhumanity.png';
+import logoIpb from '../assets/images/logo/mitra/logo_ipb.png';
+import logoJaxa from '../assets/images/logo/mitra/logo_jaxa.png';
+import logoPlanet from '../assets/images/logo/mitra/logo_planet.png';
+import logoUnosat from '../assets/images/logo/mitra/logo_unosat.png';
+
 
 const Home = () => {
     const navigate = useNavigate();
@@ -138,15 +144,21 @@ const Home = () => {
 
     // Partner logos data (mitra logos)
     const partners = [
-        { id: 1, logo: logoKemhan, alt: 'Logo Kementerian Pertahanan' },
-        { id: 2, logo: logoLen, alt: 'Logo LEN Industri' },
-        { id: 3, logo: logoBnpb, alt: 'Logo BNPB' },
-        { id: 4, logo: logoBlackSky, alt: 'Logo BlackSky' },
-        { id: 5, logo: logoUnspider, alt: 'Logo UN-SPIDER' },
-        { id: 6, logo: logoInternationalCharter, alt: 'Logo International Charter' },
-        { id: 7, logo: logoUndip, alt: 'Logo Universitas Diponegoro' },
-        { id: 8, logo: logoUgm, alt: 'Logo Universitas Gadjah Mada' },
-        { id: 9, logo: logoUnitSE, alt: 'Logo Unit SE Posi' }
+
+        { id: 1, logo: logoBnpb, alt: 'Logo BNPB' },
+        { id: 2, logo: logoKemhan, alt: 'Logo Kementerian Pertahanan' },
+        { id: 3, logo: logoLen, alt: 'Logo LEN Industri' },
+        { id: 4, logo: logoInternationalCharter, alt: 'Logo International Charter' },
+        { id: 5, logo: logoUnitSE, alt: 'Logo Unit SE Posi' },
+        { id: 6, logo: logoUnspider, alt: 'Logo UN-SPIDER' },
+        { id: 7, logo: logoUnosat, alt: 'Logo UNOSAT' },
+        { id: 8, logo: logoBlackSky, alt: 'Logo BlackSky' },
+        { id: 9, logo: logoPlanet, alt: 'Logo Planet' },
+        { id: 10, logo: logoJaxa, alt: 'Logo JAXA' },
+        { id: 11, logo: logoUndip, alt: 'Logo Universitas Diponegoro' },
+        { id: 12, logo: logoUgm, alt: 'Logo Universitas Gadjah Mada' },
+        { id: 13, logo: logoIpb, alt: 'Logo IPB' },  
+        { id: 14, logo: logoFlyForHumanity, alt: 'Logo Fly For Humanity' }
     ];
 
     return (

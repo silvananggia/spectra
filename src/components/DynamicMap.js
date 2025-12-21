@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { MapContainer, useMap, TileLayer } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -111,6 +111,262 @@ const XYZTileLayer = ({ url, opacity = 0.7, visible = true, zIndex = 100, attrib
       }
     };
   }, [map, url, attribution]);
+
+  useEffect(() => {
+    if (layerRef.current) {
+      if (visible) {
+        if (!map.hasLayer(layerRef.current)) {
+          layerRef.current.addTo(map);
+        }
+      } else {
+        if (map.hasLayer(layerRef.current)) {
+          map.removeLayer(layerRef.current);
+        }
+      }
+    }
+  }, [map, visible]);
+
+  useEffect(() => {
+    if (layerRef.current) {
+      layerRef.current.setOpacity(opacity);
+    }
+  }, [opacity]);
+
+  return null;
+};
+
+// ArcGIS MapServer Layer Component
+// Uses L.esri.dynamicMapLayer for better ArcGIS MapServer support
+const ArcGISMapServerLayer = ({ url, layerId, opacity = 0.7, visible = true, zIndex = 100, attribution = '' }) => {
+  const map = useMap();
+  const layerRef = useRef(null);
+
+  // Create layer only when URL or layerId changes (not when visible/opacity changes)
+  useEffect(() => {
+    // Wait for Esri Leaflet to be loaded with max retries
+    let retryCount = 0;
+    const maxRetries = 50; // 5 seconds max (50 * 100ms)
+    
+    const checkAndCreateLayer = () => {
+      // Check if Esri Leaflet is loaded
+      if (!window.L || !window.L.esri || !window.L.esri.dynamicMapLayer) {
+        retryCount++;
+        if (retryCount < maxRetries) {
+          setTimeout(checkAndCreateLayer, 100);
+        } else {
+          console.error('Esri Leaflet failed to load after', maxRetries, 'retries');
+        }
+        return;
+      }
+
+      // Remove existing layer if any
+      if (layerRef.current && map.hasLayer(layerRef.current)) {
+        map.removeLayer(layerRef.current);
+        layerRef.current = null;
+      }
+
+      try {
+        // Clean up URL - ensure it ends with MapServer
+        let baseUrl = url.trim();
+        if (baseUrl.endsWith('/')) {
+          baseUrl = baseUrl.slice(0, -1);
+        }
+        if (!baseUrl.endsWith('MapServer')) {
+          baseUrl = baseUrl.endsWith('/') ? baseUrl + 'MapServer' : baseUrl + '/MapServer';
+        }
+
+        // Create dynamic map layer options
+        const layerOptions = {
+          opacity: opacity,
+          zIndex: zIndex,
+          attribution: attribution || '&copy; Esri',
+          useCors: true, // Enable CORS for cross-origin requests
+        };
+
+        // If layerId is specified, show only that layer
+        if (layerId !== undefined && layerId !== null && layerId !== '') {
+          layerOptions.layers = [parseInt(layerId, 10)]; // Array of layer IDs to show (must be integers)
+        }
+
+        // Create Esri dynamic map layer
+        const arcgisLayer = L.esri.dynamicMapLayer({
+          url: baseUrl,
+          ...layerOptions
+        });
+
+        // Add error handling
+        arcgisLayer.on('error', function(e) {
+          console.error('ArcGIS MapServer layer error:', e);
+        });
+
+        layerRef.current = arcgisLayer;
+        
+        // Only add to map if visible
+        if (visible) {
+          arcgisLayer.addTo(map);
+        }
+      } catch (error) {
+        console.error('Error creating ArcGIS MapServer layer:', error);
+      }
+    };
+
+    checkAndCreateLayer();
+
+    return () => {
+      if (layerRef.current && map.hasLayer(layerRef.current)) {
+        map.removeLayer(layerRef.current);
+        layerRef.current = null;
+      }
+    };
+  }, [map, url, layerId, zIndex, attribution]); // Removed visible and opacity from dependencies
+
+  // Handle visibility changes separately
+  useEffect(() => {
+    if (!layerRef.current) return;
+
+    if (visible) {
+      if (!map.hasLayer(layerRef.current)) {
+        layerRef.current.addTo(map);
+      }
+    } else {
+      if (map.hasLayer(layerRef.current)) {
+        map.removeLayer(layerRef.current);
+      }
+    }
+  }, [map, visible]);
+
+  // Handle opacity changes separately
+  useEffect(() => {
+    if (layerRef.current) {
+      layerRef.current.setOpacity(opacity);
+    }
+  }, [opacity]);
+
+  return null;
+};
+
+// MVT Vector Tile Layer Component (for Martin and similar vector tile servers)
+const MVTLayer = ({ url, style, opacity = 0.7, visible = true, zIndex = 100, attribution = '' }) => {
+  const map = useMap();
+  const layerRef = useRef(null);
+
+  useEffect(() => {
+    if (!visible) {
+      if (layerRef.current && map.hasLayer(layerRef.current)) {
+        map.removeLayer(layerRef.current);
+        layerRef.current = null;
+      }
+      return;
+    }
+
+    // Wait for vectorgrid to be loaded with max retries
+    let retryCount = 0;
+    const maxRetries = 50; // 5 seconds max (50 * 100ms)
+    
+    const checkAndCreateLayer = () => {
+      // Check if vectorgrid is loaded
+      if (!window.L || !window.L.vectorGrid || !window.L.vectorGrid.protobuf) {
+        retryCount++;
+        if (retryCount < maxRetries) {
+          setTimeout(checkAndCreateLayer, 100);
+        } else {
+          console.error('leaflet.vectorgrid failed to load after', maxRetries, 'retries');
+        }
+        return;
+      }
+
+      try {
+        // Parse style if provided
+        let styleConfig = {};
+        if (style) {
+          try {
+            styleConfig = typeof style === 'string' ? JSON.parse(style) : style;
+          } catch (e) {
+            console.warn('Invalid style JSON for MVT layer, using defaults:', e);
+            styleConfig = {};
+          }
+        }
+
+        // Default style for vector tiles
+        const defaultStyle = {
+          fill: true,
+          fillColor: styleConfig.fillColor || styleConfig.fill || '#3388ff',
+          fillOpacity: styleConfig.fillOpacity !== undefined ? styleConfig.fillOpacity : opacity * 0.3,
+          stroke: true,
+          color: styleConfig.color || styleConfig.stroke || '#3388ff',
+          weight: styleConfig.weight || styleConfig.strokeWidth || 2,
+          opacity: styleConfig.opacity !== undefined ? styleConfig.opacity : opacity,
+        };
+
+        // Create vector tile layer
+        // Martin tiles use format: {url}/{z}/{x}/{y}.pbf
+        // Other servers might use: {url}/{z}/{x}/{y}.mvt
+        const tileUrl = url.includes('{z}') ? url : `${url}/{z}/{x}/{y}.pbf`;
+
+        const vectorLayer = L.vectorGrid.protobuf(tileUrl, {
+          attribution: attribution || '',
+          opacity: opacity,
+          zIndex: zIndex,
+          maxZoom: 19,
+          // Vector tile styling
+          getFeatureId: function(f) {
+            return f.properties.id || f.properties.osm_id || f.properties.gid;
+          },
+          // Style function - can be customized per feature
+          vectorTileLayerStyles: {
+            // Default style for all layers
+            default: defaultStyle,
+            // You can specify styles per layer name if needed
+            // Example: 'roads': { color: '#ff0000', weight: 3 }
+            ...(styleConfig.layers || {})
+          },
+          // Interactive options
+          interactive: true,
+          // Renderer options
+          rendererFactory: L.svg.tile,
+        });
+
+        // Add error handling
+        vectorLayer.on('error', function(e) {
+          console.error('MVT layer error:', e);
+        });
+
+        // Add popup on click if needed
+        if (styleConfig.popup !== false) {
+          vectorLayer.on('click', function(e) {
+            const props = e.layer.properties;
+            if (props && Object.keys(props).length > 0) {
+              let popupContent = '<div style="max-width: 200px;">';
+              Object.keys(props).forEach(key => {
+                if (key !== 'id' && key !== 'osm_id' && key !== 'gid') {
+                  popupContent += `<strong>${key}:</strong> ${props[key]}<br>`;
+                }
+              });
+              popupContent += '</div>';
+              L.popup()
+                .setLatLng(e.latlng)
+                .setContent(popupContent)
+                .openOn(map);
+            }
+          });
+        }
+
+        layerRef.current = vectorLayer;
+        vectorLayer.addTo(map);
+      } catch (error) {
+        console.error('Error creating MVT layer:', error);
+      }
+    };
+
+    checkAndCreateLayer();
+
+    return () => {
+      if (layerRef.current && map.hasLayer(layerRef.current)) {
+        map.removeLayer(layerRef.current);
+        layerRef.current = null;
+      }
+    };
+  }, [map, url, style, visible, opacity, zIndex, attribution]);
 
   useEffect(() => {
     if (layerRef.current) {
@@ -399,8 +655,10 @@ const LayerLegend = ({ layer }) => {
 
   useEffect(() => {
     setHasError(false);
+    const layerType = layer.type.toLowerCase();
+    
     // For WMS layers, try to get legend via GetLegendGraphic
-    if (layer.type.toLowerCase() === 'wms' && layer.url && (layer.layer_name || layer.name)) {
+    if (layerType === 'wms' && layer.url && (layer.layer_name || layer.name)) {
       try {
         const wmsUrl = new URL(layer.url);
         const legendParams = new URLSearchParams({
@@ -417,13 +675,39 @@ const LayerLegend = ({ layer }) => {
         console.error('Error constructing WMS legend URL:', error);
         setHasError(true);
       }
+    }
+    // For ArcGIS MapServer layers, try to get legend via REST API
+    else if ((layerType === 'arcgis' || layerType === 'mapserver' || layerType === 'arcgismapserver') && layer.url) {
+      try {
+        let baseUrl = layer.url.trim();
+        if (baseUrl.endsWith('/')) {
+          baseUrl = baseUrl.slice(0, -1);
+        }
+        if (!baseUrl.endsWith('MapServer')) {
+          baseUrl = baseUrl.endsWith('/') ? baseUrl + 'MapServer' : baseUrl + '/MapServer';
+        }
+        
+        // ArcGIS MapServer legend endpoint: {baseUrl}/legend?f=json
+        // For image: {baseUrl}/legend?f=png (if supported)
+        // Or for specific layer: {baseUrl}/{layerId}/legend?f=png
+        const layerId = layer.layer_id || layer.layerId;
+        const legendEndpoint = layerId !== undefined && layerId !== null
+          ? `${baseUrl}/${layerId}/legend?f=png`
+          : `${baseUrl}/legend?f=png`;
+        
+        setLegendUrl(legendEndpoint);
+      } catch (error) {
+        console.error('Error constructing ArcGIS legend URL:', error);
+        setHasError(true);
+      }
     } else {
       setLegendUrl(null);
     }
   }, [layer]);
 
-  // For WMS, show legend image
-  if (layer.type.toLowerCase() === 'wms' && legendUrl && !hasError) {
+  // For WMS and ArcGIS MapServer, show legend image
+  const layerType = layer.type.toLowerCase();
+  if ((layerType === 'wms' || layerType === 'arcgis' || layerType === 'mapserver' || layerType === 'arcgismapserver') && legendUrl && !hasError) {
     return (
       <div className="layer-legend">
         <div className="legend-title">{t('maps.legend')}</div>
@@ -715,6 +999,17 @@ const DynamicMap = ({ mapId }) => {
         }
         break;
 
+      case 'arcgis':
+      case 'mapserver':
+      case 'arcgismapserver':
+        // For ArcGIS MapServer, try to get extent from service if possible
+        // For now, use fallback: zoom to center with higher zoom
+        if (currentMap?.center) {
+          const center = getMapCenter();
+          map.setView(center, Math.min((currentMap.zoom || 5) + 2, 15));
+        }
+        break;
+
       default:
         // Fallback: zoom to map center with higher zoom
         if (currentMap?.center) {
@@ -794,6 +1089,20 @@ const DynamicMap = ({ mapId }) => {
                       attribution={layer.style || ''}
                     />
                   );
+                case 'arcgis':
+                case 'mapserver':
+                case 'arcgismapserver':
+                  return (
+                    <ArcGISMapServerLayer
+                      key={layer.id}
+                      url={layer.url}
+                      layerId={layer.layer_id || layer.layerId || null}
+                      opacity={state.opacity}
+                      visible={state.visible}
+                      zIndex={layer.z_index || 100}
+                      attribution={layer.attribution || layer.style || '&copy; Esri'}
+                    />
+                  );
                 case 'geojson':
                   return (
                     <GeoJSONLayer
@@ -805,10 +1114,20 @@ const DynamicMap = ({ mapId }) => {
                       zIndex={layer.z_index || 100}
                     />
                   );
-                case 'wfs':
                 case 'mvt':
-                  // WFS and MVT require more complex handling
-                  // For now, we'll show a placeholder
+                  return (
+                    <MVTLayer
+                      key={layer.id}
+                      url={layer.url}
+                      style={layer.style}
+                      opacity={state.opacity}
+                      visible={state.visible}
+                      zIndex={layer.z_index || 100}
+                      attribution={layer.attribution || ''}
+                    />
+                  );
+                case 'wfs':
+                  // WFS requires more complex handling
                   console.warn(`Layer type ${layer.type} not yet fully implemented`);
                   return null;
                 default:

@@ -25,14 +25,15 @@ const Products = () => {
     
     const itemsPerPage = 9;
 
-    // Update filters when URL query parameters change
+    // Update filters when URL query parameters change (on mount or external navigation)
     useEffect(() => {
         const regionParam = searchParams.get('region') || '';
         const categoryParam = searchParams.get('category') || t('products.allEvents');
+        
         setRegionFilter(regionParam);
         setEventTypeFilter(categoryParam);
         setCurrentPage(1); // Reset to first page when filters change
-    }, [searchParams, t]);
+    }, [searchParams.toString()]); // Use toString() to detect actual URL changes
 
     // Fetch products from API using Redux
     useEffect(() => {
@@ -111,11 +112,21 @@ const Products = () => {
     const handleSearch = () => {
         // Update URL query parameters
         const newParams = new URLSearchParams();
-        if (regionFilter && regionFilter.trim() !== '') {
-            newParams.set('region', regionFilter.trim());
+        const trimmedRegion = regionFilter ? regionFilter.trim() : '';
+        const trimmedCategory = eventTypeFilter && eventTypeFilter !== t('products.allEvents') ? eventTypeFilter : '';
+        
+        if (trimmedRegion !== '') {
+            newParams.set('region', trimmedRegion);
+        } else {
+            // Explicitly remove region param if empty
+            newParams.delete('region');
         }
-        if (eventTypeFilter && eventTypeFilter !== t('products.allEvents')) {
-            newParams.set('category', eventTypeFilter);
+        
+        if (trimmedCategory !== '') {
+            newParams.set('category', trimmedCategory);
+        } else {
+            // Explicitly remove category param if empty
+            newParams.delete('category');
         }
         
         // Update URL without page reload
